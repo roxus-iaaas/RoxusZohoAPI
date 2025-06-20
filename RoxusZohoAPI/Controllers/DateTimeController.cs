@@ -20,7 +20,7 @@ namespace RoxusZohoAPI.Controllers
     [ApiController]
     public class DateTimeController : ControllerBase
     {
-
+        
         public DateTimeController(IHinetsBooksService hinetsBookService, IHinetsProjectsService hinetsProjectsService, IHinetsCustomService hinetsCustomService, IHinetsCrmService hinetsCrmService)
         {
         }
@@ -48,9 +48,36 @@ namespace RoxusZohoAPI.Controllers
             }
         }
 
-        
+
         #endregion
 
-        
+        [HttpPost("get-time")]
+        public IActionResult GetCurrentTime([FromBody] GetCurrentTimeRequest request)
+        {
+            var apiResult = new ApiResultDto<string>()
+            {
+                Code = ResultCode.BadRequest,
+                Message = CommonConstants.MSG_400,
+            };
+
+            try
+            {
+
+                string dateTimeNow = DateTimeHelpers.GetCurrentTime(request);
+
+                apiResult.Code = ResultCode.OK;
+                apiResult.Message = CommonConstants.MSG_200;
+                apiResult.Data = dateTimeNow;
+
+                return Ok(apiResult);
+
+            }
+            catch (Exception ex)
+            {
+                apiResult.Message = $"{ex.Message} - {ex.StackTrace}";
+                return BadRequest(apiResult);
+            }
+        }
+
     }
 }

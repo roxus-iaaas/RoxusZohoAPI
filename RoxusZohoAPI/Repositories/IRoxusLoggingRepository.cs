@@ -19,7 +19,7 @@ namespace RoxusZohoAPI.Repositories
 
         Task<AppConfiguration> GetAppConfigurationByApiKey(string apiKey);
 
-        Task UpdateAccessTokenAndExpiredTime(string id, string accessToken, string newExpiredTime, string refreshToken = "");
+        Task UpdateTokenAndExpiredTime(string id, string accessToken, string newExpiredTime, string refreshToken = "");
 
         #endregion
 
@@ -54,6 +54,23 @@ namespace RoxusZohoAPI.Repositories
         Task<IEnumerable<DocmailRecord>> GetDocmailRecordBySMId(string smId);
 
         Task<IEnumerable<DocmailRecord>> GetDocmailRecordByMailingReference(string smNumber);
+
+        #endregion
+
+        #region Integration Logs
+
+        Task<IEnumerable<IntegrationLog>> GetIntegrationLogs();
+
+        Task<IntegrationLog> GetLatestIntegrationLogByCursor
+            (string customerName, string platformName);
+
+        Task<IEnumerable<IntegrationLog>> GetEmptyIntegrationLogs();
+
+        Task CreateIntegrationLog(IntegrationLog integrationLog);
+
+        Task UpdateIntegrationLog(int currentCursor, string output, string result
+            , string input1 = "", string input2 = "", string input3 = "", string input4 = "", string input5 = ""
+            , string input6 = "", string input7 = "", string input8 = "", string input9 = "", string input10 = "");
 
         #endregion
 

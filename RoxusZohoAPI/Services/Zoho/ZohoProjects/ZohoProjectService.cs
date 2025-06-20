@@ -448,9 +448,10 @@ namespace RoxusWebAPI.Services.Zoho.ZohoProjects
             };
             try
             {
+
                 #region STEP 1: Get Project Details
                 var projectModels = await GetProjectDetails(apiKey, projectId);
-                Thread.Sleep(1000);
+                Thread.Sleep(5000);
                 if (projectModels == null)
                 {
                     apiResult.Message = ZohoConstants.CUSTOM_ITD_P01;
@@ -461,7 +462,7 @@ namespace RoxusWebAPI.Services.Zoho.ZohoProjects
 
                 #region STEP 2: Get Task Details
                 var taskModels = await GetTaskDetails(apiKey, taskId, projectId);
-                Thread.Sleep(1000);
+                Thread.Sleep(5000);
                 if (taskModels == null)
                 {
                     apiResult.Message = ZohoConstants.CUSTOM_ITD_T01;
@@ -487,6 +488,7 @@ namespace RoxusWebAPI.Services.Zoho.ZohoProjects
                 {
                     taskEntity.CreatedTime = DateTime.UtcNow;
                 }
+
                 taskEntity.TaskId = taskId;
                 taskEntity.TaskName = taskModel.name;
                 taskEntity.ProjectId = projectId;

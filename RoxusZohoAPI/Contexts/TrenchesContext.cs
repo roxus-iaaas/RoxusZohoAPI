@@ -6,6 +6,7 @@ namespace RoxusZohoAPI.Contexts
 {
     public class TrenchesContext : DbContext
     {
+
         public TrenchesContext(DbContextOptions<TrenchesContext> options)
             : base(options)
         {

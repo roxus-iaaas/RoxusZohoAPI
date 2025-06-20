@@ -1608,6 +1608,7 @@ namespace RoxusZohoAPI.Services.Zoho
                     emailContent.Subject = emailContent.Subject.Replace("$ErrorCode$", "[PSL-T06]")
                         .Replace("$TitleNumber$", titleNumber);
                     errorDetails += "<br>" + ZohoConstants.CUSTOM_PSL_T06;
+                    errorDetails += "<br>" + insertTaskResult.Message;
                     emailContent.Body = emailBody.Replace("$ErrorDetails$", errorDetails);
                     await EmailHelpers.SendEmail(emailContent);
                     return apiResult;
@@ -3792,6 +3793,6 @@ namespace RoxusZohoAPI.Services.Zoho
                 return apiResult;
             }
         }
-
+    
     }
 }

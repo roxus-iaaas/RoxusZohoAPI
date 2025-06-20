@@ -9,6 +9,7 @@ namespace RoxusZohoAPI.Helpers.Constants
     {
         public const string MSG_200 = "SUCCESS";
         public const string MSG_400 = "FAILED";
+        public const string MSG_401 = "UNAUTHORIZED";
 
         public const string PlainDateTimeFormat = "yyyyMMddTHHmmss";
         public const string DateTimeFormat = "yyyy/MM/dd HH:mm:ss";
@@ -35,6 +36,14 @@ namespace RoxusZohoAPI.Helpers.Constants
         #region Kryon
         public const string RowDelimiter = "###^#^###";
         public const string ColumnDelimiter = "~~*~*~~";
+        #endregion
+
+        #region Blob Storage
+
+        public const string Roxus_ClientSecret = "-j-8Q~5QUGFLH5h1vy~SnyNy6z4THyyjN2vepcn1";
+
+        public const string Roxus_BlobStorage = "roxusautomationlogs";
+
         #endregion
 
     }

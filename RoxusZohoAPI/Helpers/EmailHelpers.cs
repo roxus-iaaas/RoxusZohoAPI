@@ -10,44 +10,32 @@ namespace RoxusZohoAPI.Helpers
 {
     public class EmailHelpers
     {
-        public static async Task SendEmail(EmailContent emailContent)
+        public static async Task SendEmail(EmailContent emailContents)
         {
             try
             {
                 using (MailMessage mail = new MailMessage())
                 {
-                    SmtpClient SmtpServer = new SmtpClient(emailContent.SmtpServer);
+                    SmtpClient SmtpServer = new SmtpClient(CommonConstants.Outlook_Email_SmtpServer);
 
-                    if (!string.IsNullOrEmpty(emailContent.FromName))
-                    {
-                        mail.From = new MailAddress(emailContent.Email, emailContent.FromName);
-                    }
-                    else
-                    {
-                        mail.From = new MailAddress(emailContent.Email);
-                    }
+                    mail.From = new MailAddress(CommonConstants.Email_Username);
                     mail.IsBodyHtml = true;
 
-                    string[] clients = emailContent.Clients.Split(";");
+                    mail.To.Add(emailContents.Clients);
+                    mail.Subject = emailContents.Subject;
+                    mail.Body = emailContents.Body;
 
-                    foreach (var client in clients)
-                    {
-                        mail.To.Add(client);
-                    }
-
-                    mail.Subject = emailContent.Subject;
-                    mail.Body = emailContent.Body;
-
-                    SmtpServer.Port = emailContent.SmtpPort;
-                    SmtpServer.Credentials = new System.Net.NetworkCredential(emailContent.Email, emailContent.Password);
+                    SmtpServer.Port = CommonConstants.SmtpPort;
+                    SmtpServer.Credentials = new System.Net.NetworkCredential
+                        (CommonConstants.Email_Username, CommonConstants.Email_Password);
                     SmtpServer.EnableSsl = true;
 
                     await SmtpServer.SendMailAsync(mail);
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                throw new Exception(ex.Message);
+                throw new Exception("Send email failed");
             }
         }
 

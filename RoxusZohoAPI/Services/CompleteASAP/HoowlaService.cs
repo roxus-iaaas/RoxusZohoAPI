@@ -1,0 +1,1082 @@
+﻿using Newtonsoft.Json;
+using RoxusZohoAPI.Entities.RoxusDB;
+using RoxusZohoAPI.Helpers.Constants;
+using RoxusZohoAPI.Helpers;
+using RoxusZohoAPI.Models.Common;
+using RoxusZohoAPI.Models.CompleteASAP.Hoowla;
+using RoxusZohoAPI.Models.Zoho.ZohoCRM.Hinets;
+using System.IO;
+using System.Net.Http;
+using System.Net;
+using System;
+using System.Threading.Tasks;
+using RoxusZohoAPI.Repositories;
+using System.Runtime.CompilerServices;
+using System.Collections.Generic;
+using RoxusZohoAPI.Models.PureFinance.Pipedrive;
+using System.Text;
+using RoxusZohoAPI.Models.Zoho.ZohoCRM;
+
+namespace RoxusZohoAPI.Services.CompleteASAP
+{
+
+    public class HoowlaService : IHoowlaService
+    {
+
+        private readonly IRoxusLoggingRepository _loggingRepository;
+
+        public HoowlaService(IRoxusLoggingRepository loggingRepository)
+        {
+            _loggingRepository = loggingRepository;
+        }
+
+        public async Task<ApiResultDto<CasesViewACaseResponse>> CasesViewACase(string caseId)
+        {
+            ApiLogging apiLogging = null;
+            string endpoint = string.Empty;
+            var apiResult = new ApiResultDto<CasesViewACaseResponse>();
+            try
+            {
+
+                endpoint = $"{CompleteASAPConstants.HoowlaApiEndpointV2}/cases/cases/info?id={caseId}" +
+                    $"&key={CompleteASAPConstants.HoowlaApiKey}&user={CompleteASAPConstants.HoowlaRoxusEmail}";
+                var request = new HttpRequestMessage(
+                           HttpMethod.Get,
+                           endpoint);
+                using var httpClient = new HttpClient();
+                using var response = await httpClient.SendAsync(request,
+                           HttpCompletionOption.ResponseHeadersRead);
+                response.EnsureSuccessStatusCode();
+                var stream = await response.Content.ReadAsStreamAsync();
+                // Convert stream to string
+                var reader = new StreamReader(stream);
+                string responseData = reader.ReadToEnd();
+                if (response.StatusCode == HttpStatusCode.OK)
+                {
+                    var responseObj = JsonConvert.DeserializeObject<CasesViewACaseResponse>(responseData);
+                    apiResult.Code = ResultCode.OK;
+                    apiResult.Message = ZohoConstants.MSG_200;
+                    apiResult.Data = responseObj;
+                }
+
+                if (response.StatusCode == HttpStatusCode.NoContent)
+                {
+                    apiResult.Code = ResultCode.NoContent;
+                    apiResult.Message = ZohoConstants.MSG_204;
+                }
+                // HANDLE LOGGING TO DATABASE
+                apiLogging = new ApiLogging()
+                {
+                    Id = Guid.NewGuid().ToString(),
+                    Response = responseData,
+                    ApplicationName = "Hoowla",
+                    CustomerName = "CompleteASAP",
+                    Status = (int)response.StatusCode + " " + response.StatusCode,
+                    CreatedDate = DateTimeHelpers.ConvertDateTimeToString(DateTime.UtcNow),
+                    HttpMethod = "GET",
+                    ApiName = "Cases - View a Case",
+                    Endpoint = endpoint
+                };
+                return apiResult;
+            }
+            catch (WebException ex)
+            {
+                HttpWebResponse badResponse = (HttpWebResponse)ex.Response;
+                using (Stream responseStream = badResponse.GetResponseStream())
+                {
+                    if (responseStream != null)
+                    {
+                        using var reader = new StreamReader(responseStream);
+                        string responseData = reader.ReadToEnd();
+                        apiLogging = new ApiLogging()
+                        {
+                            Id = Guid.NewGuid().ToString(),
+                            Response = responseData,
+                            ApplicationName = "Hoowla",
+                            CustomerName = "CompleteASAP",
+                            Status = (int)badResponse.StatusCode + " " + badResponse.StatusCode,
+                            CreatedDate = DateTimeHelpers.ConvertDateTimeToString(DateTime.UtcNow),
+                            HttpMethod = "GET",
+                            ApiName = "Cases - View a Case",
+                            Endpoint = endpoint
+                        };
+                    }
+                }
+                return null;
+            }
+            catch (Exception ex)
+            {
+                apiResult.Message = $"{ex.Message} - {ex.StackTrace}";
+                return apiResult;
+            }
+            finally
+            {
+                if (apiLogging != null)
+                {
+                    await _loggingRepository.CreateApiLogging(apiLogging);
+                }
+
+            }
+        }
+
+        public async Task<ApiResultDto<CasesUpdateManyCustomFieldsResponse>> 
+            CasesUpdateManyCustomFields(string caseId, CasesUpdateManyCustomFieldsRequest updateRequest)
+        {
+
+            ApiLogging apiLogging = null;
+            string endpoint = string.Empty;
+            var apiResult = new ApiResultDto<CasesUpdateManyCustomFieldsResponse>();
+            try
+            {
+
+                endpoint = $"{CompleteASAPConstants.HoowlaApiEndpointV2}/cases/custom-fields/many?" +
+                    $"case={caseId}&key={CompleteASAPConstants.HoowlaApiKey}&user={CompleteASAPConstants.HoowlaRoxusEmail}";
+                
+                string requestBody = JsonConvert.SerializeObject(updateRequest);
+
+                var request = new HttpRequestMessage(
+                           HttpMethod.Put,
+                           endpoint)
+                {
+                    Content = new StringContent(requestBody, Encoding.UTF8, "application/json")
+                };
+                using var httpClient = new HttpClient();
+                using var response = await httpClient.SendAsync(request,
+                           HttpCompletionOption.ResponseHeadersRead);
+                response.EnsureSuccessStatusCode();
+                var stream = await response.Content.ReadAsStreamAsync();
+                // Convert stream to string
+                var reader = new StreamReader(stream);
+                string responseData = reader.ReadToEnd();
+                if (response.StatusCode == HttpStatusCode.OK)
+                {
+                    var responseObj = JsonConvert.DeserializeObject
+                        <CasesUpdateManyCustomFieldsResponse>(responseData);
+                    apiResult.Code = ResultCode.OK;
+                    apiResult.Message = ZohoConstants.MSG_200;
+                    apiResult.Data = responseObj;
+                }
+
+                if (response.StatusCode == HttpStatusCode.NoContent)
+                {
+                    apiResult.Code = ResultCode.NoContent;
+                    apiResult.Message = ZohoConstants.MSG_204;
+                }
+                // HANDLE LOGGING TO DATABASE
+                apiLogging = new ApiLogging()
+                {
+                    Id = Guid.NewGuid().ToString(),
+                    Response = responseData,
+                    ApplicationName = "Hoowla",
+                    CustomerName = "CompleteASAP",
+                    Status = (int)response.StatusCode + " " + response.StatusCode,
+                    CreatedDate = DateTimeHelpers.ConvertDateTimeToString(DateTime.UtcNow),
+                    HttpMethod = "PUT",
+                    ApiName = "Cases - Update Many Custom Fields",
+                    Endpoint = endpoint
+                };
+                return apiResult;
+            }
+            catch (WebException ex)
+            {
+                HttpWebResponse badResponse = (HttpWebResponse)ex.Response;
+                using (Stream responseStream = badResponse.GetResponseStream())
+                {
+                    if (responseStream != null)
+                    {
+                        using var reader = new StreamReader(responseStream);
+                        string responseData = reader.ReadToEnd();
+                        apiLogging = new ApiLogging()
+                        {
+                            Id = Guid.NewGuid().ToString(),
+                            Response = responseData,
+                            ApplicationName = "Hoowla",
+                            CustomerName = "CompleteASAP",
+                            Status = (int)badResponse.StatusCode + " " + badResponse.StatusCode,
+                            CreatedDate = DateTimeHelpers.ConvertDateTimeToString(DateTime.UtcNow),
+                            HttpMethod = "GET",
+                            ApiName = "Cases - Update Many Custom Fields",
+                            Endpoint = endpoint
+                        };
+                    }
+                }
+                return null;
+            }
+            catch (Exception ex)
+            {
+                return null;
+            }
+            finally
+            {
+                if (apiLogging != null)
+                {
+                    await _loggingRepository.CreateApiLogging(apiLogging);
+                }
+
+            }
+
+        }
+
+        public async Task<ApiResultDto<CasesListCaseTypesResponse>> CasesListCaseTypes()
+        {
+            ApiLogging apiLogging = null;
+            string endpoint = string.Empty;
+            var apiResult = new ApiResultDto<CasesListCaseTypesResponse>();
+            try
+            {
+
+                endpoint = $"{CompleteASAPConstants.HoowlaApiEndpointV2}/cases/types?" +
+                    $"key={CompleteASAPConstants.HoowlaApiKey}&user={CompleteASAPConstants.HoowlaRoxusEmail}";
+                var request = new HttpRequestMessage(
+                           HttpMethod.Get,
+                           endpoint);
+                using var httpClient = new HttpClient();
+                using var response = await httpClient.SendAsync(request,
+                           HttpCompletionOption.ResponseHeadersRead);
+                response.EnsureSuccessStatusCode();
+                var stream = await response.Content.ReadAsStreamAsync();
+                // Convert stream to string
+                var reader = new StreamReader(stream);
+                string responseData = reader.ReadToEnd();
+                if (response.StatusCode == HttpStatusCode.OK)
+                {
+                    var responseObj = JsonConvert.DeserializeObject
+                        <List<HoowlaCaseTypeDetails>>(responseData);
+                    apiResult.Code = ResultCode.OK;
+                    apiResult.Message = ZohoConstants.MSG_200;
+                    var casesListCaseTypesResponse = new CasesListCaseTypesResponse
+                    {
+                        CaseTypes = responseObj
+                    };
+                    apiResult.Data = casesListCaseTypesResponse;
+                }
+
+                if (response.StatusCode == HttpStatusCode.NoContent)
+                {
+                    apiResult.Code = ResultCode.NoContent;
+                    apiResult.Message = ZohoConstants.MSG_204;
+                }
+                // HANDLE LOGGING TO DATABASE
+                apiLogging = new ApiLogging()
+                {
+                    Id = Guid.NewGuid().ToString(),
+                    Response = responseData,
+                    ApplicationName = "Hoowla",
+                    CustomerName = "CompleteASAP",
+                    Status = (int)response.StatusCode + " " + response.StatusCode,
+                    CreatedDate = DateTimeHelpers.ConvertDateTimeToString(DateTime.UtcNow),
+                    HttpMethod = "GET",
+                    ApiName = "Cases - List Case Types",
+                    Endpoint = endpoint
+                };
+                return apiResult;
+            }
+            catch (WebException ex)
+            {
+                HttpWebResponse badResponse = (HttpWebResponse)ex.Response;
+                using (Stream responseStream = badResponse.GetResponseStream())
+                {
+                    if (responseStream != null)
+                    {
+                        using var reader = new StreamReader(responseStream);
+                        string responseData = reader.ReadToEnd();
+                        apiLogging = new ApiLogging()
+                        {
+                            Id = Guid.NewGuid().ToString(),
+                            Response = responseData,
+                            ApplicationName = "Hoowla",
+                            CustomerName = "CompleteASAP",
+                            Status = (int)badResponse.StatusCode + " " + badResponse.StatusCode,
+                            CreatedDate = DateTimeHelpers.ConvertDateTimeToString(DateTime.UtcNow),
+                            HttpMethod = "GET",
+                            ApiName = "Cases - List Case Types",
+                            Endpoint = endpoint
+                        };
+                    }
+                }
+                return null;
+            }
+            catch (Exception ex)
+            {
+                return null;
+            }
+            finally
+            {
+                if (apiLogging != null)
+                {
+                    await _loggingRepository.CreateApiLogging(apiLogging);
+                }
+
+            }
+        }
+
+        public async Task<ApiResultDto<CasesListCasesForUserResponse>> CasesListCasesForUser
+            (CasesListCasesForUserRequest listCasesRequest)
+        {
+            ApiLogging apiLogging = null;
+            string endpoint = string.Empty;
+            var apiResult = new ApiResultDto<CasesListCasesForUserResponse>()
+            {
+                Code = ResultCode.BadRequest,
+                Message = CompleteASAPConstants.CLC4U_400
+            };
+
+            try
+            {
+
+                if (string.IsNullOrEmpty(listCasesRequest.Query))
+                {
+                    return apiResult;
+                }
+
+                endpoint = $"{CompleteASAPConstants.HoowlaApiEndpointV2}/cases/cases/?" +
+                    $"key={CompleteASAPConstants.HoowlaApiKey}&user={CompleteASAPConstants.HoowlaRoxusEmail}" +
+                    $"&query={listCasesRequest.Query}";
+                var request = new HttpRequestMessage(
+                           HttpMethod.Get,
+                           endpoint);
+                using var httpClient = new HttpClient();
+                using var response = await httpClient.SendAsync(request,
+                           HttpCompletionOption.ResponseHeadersRead);
+                response.EnsureSuccessStatusCode();
+                var stream = await response.Content.ReadAsStreamAsync();
+                // Convert stream to string
+                var reader = new StreamReader(stream);
+                string responseData = reader.ReadToEnd();
+                if (response.StatusCode == HttpStatusCode.OK)
+                {
+                    var responseObj = JsonConvert.DeserializeObject
+                        <List<HoowlaListCase>>(responseData);
+                    apiResult.Code = ResultCode.OK;
+                    apiResult.Message = CompleteASAPConstants.CLC4U_200;
+
+                    apiResult.Data = new CasesListCasesForUserResponse()
+                    {
+                        Cases = responseObj
+                    };
+                    return apiResult;
+                }
+
+                if (response.StatusCode == HttpStatusCode.NoContent)
+                {
+                    apiResult.Code = ResultCode.NoContent;
+                    apiResult.Message = ZohoConstants.MSG_204;
+                    return apiResult;
+                }
+                // HANDLE LOGGING TO DATABASE
+                apiLogging = new ApiLogging()
+                {
+                    Id = Guid.NewGuid().ToString(),
+                    Response = responseData,
+                    ApplicationName = "Hoowla",
+                    CustomerName = "CompleteASAP",
+                    Status = (int)response.StatusCode + " " + response.StatusCode,
+                    CreatedDate = DateTimeHelpers.ConvertDateTimeToString(DateTime.UtcNow),
+                    HttpMethod = "GET",
+                    ApiName = "Cases - List Cases for User",
+                    Endpoint = endpoint
+                };
+                return apiResult;
+            }
+            catch (WebException ex)
+            {
+                HttpWebResponse badResponse = (HttpWebResponse)ex.Response;
+                using (Stream responseStream = badResponse.GetResponseStream())
+                {
+                    if (responseStream != null)
+                    {
+                        using var reader = new StreamReader(responseStream);
+                        string responseData = reader.ReadToEnd();
+                        apiLogging = new ApiLogging()
+                        {
+                            Id = Guid.NewGuid().ToString(),
+                            Response = responseData,
+                            ApplicationName = "Hoowla",
+                            CustomerName = "CompleteASAP",
+                            Status = (int)badResponse.StatusCode + " " + badResponse.StatusCode,
+                            CreatedDate = DateTimeHelpers.ConvertDateTimeToString(DateTime.UtcNow),
+                            HttpMethod = "GET",
+                            ApiName = "Cases - List Cases for User",
+                            Endpoint = endpoint
+                        };
+                    }
+                }
+                return null;
+            }
+            catch (Exception ex)
+            {
+                return null;
+            }
+            finally
+            {
+                if (apiLogging != null)
+                {
+                    await _loggingRepository.CreateApiLogging(apiLogging);
+                }
+            }
+        }
+
+        public async Task<ApiResultDto<CasesListCustomFieldsResponse>> CasesListCustomFields(string caseId)
+        {
+            ApiLogging apiLogging = null;
+            string endpoint = string.Empty;
+            var apiResult = new ApiResultDto<CasesListCustomFieldsResponse>();
+            try
+            {
+
+                endpoint = $"{CompleteASAPConstants.HoowlaApiEndpointV2}/cases/custom-fields/?case={caseId}" +
+                    $"&key={CompleteASAPConstants.HoowlaApiKey}&user={CompleteASAPConstants.HoowlaRoxusEmail}";
+                var request = new HttpRequestMessage(
+                           HttpMethod.Get,
+                           endpoint);
+                using var httpClient = new HttpClient();
+                using var response = await httpClient.SendAsync(request,
+                           HttpCompletionOption.ResponseHeadersRead);
+                response.EnsureSuccessStatusCode();
+                var stream = await response.Content.ReadAsStreamAsync();
+                // Convert stream to string
+                var reader = new StreamReader(stream);
+                string responseData = reader.ReadToEnd();
+                if (response.StatusCode == HttpStatusCode.OK)
+                {
+                    var responseObj = JsonConvert.DeserializeObject<List<HoowlaCustomFieldDetails>>(responseData);
+                    apiResult.Code = ResultCode.OK;
+                    apiResult.Message = ZohoConstants.MSG_200;
+                    var casesListCustomFieldsResponse = new CasesListCustomFieldsResponse
+                    {
+                        CustomFields = responseObj
+                    };
+                    apiResult.Data = casesListCustomFieldsResponse;
+                }
+
+                if (response.StatusCode == HttpStatusCode.NoContent)
+                {
+                    apiResult.Code = ResultCode.NoContent;
+                    apiResult.Message = ZohoConstants.MSG_204;
+                }
+                // HANDLE LOGGING TO DATABASE
+                apiLogging = new ApiLogging()
+                {
+                    Id = Guid.NewGuid().ToString(),
+                    Response = responseData,
+                    ApplicationName = "Hoowla",
+                    CustomerName = "CompleteASAP",
+                    Status = (int)response.StatusCode + " " + response.StatusCode,
+                    CreatedDate = DateTimeHelpers.ConvertDateTimeToString(DateTime.UtcNow),
+                    HttpMethod = "GET",
+                    ApiName = "Cases - List Custom Fields",
+                    Endpoint = endpoint
+                };
+                return apiResult;
+            }
+            catch (WebException ex)
+            {
+                HttpWebResponse badResponse = (HttpWebResponse)ex.Response;
+                using (Stream responseStream = badResponse.GetResponseStream())
+                {
+                    if (responseStream != null)
+                    {
+                        using var reader = new StreamReader(responseStream);
+                        string responseData = reader.ReadToEnd();
+                        apiLogging = new ApiLogging()
+                        {
+                            Id = Guid.NewGuid().ToString(),
+                            Response = responseData,
+                            ApplicationName = "Hoowla",
+                            CustomerName = "CompleteASAP",
+                            Status = (int)badResponse.StatusCode + " " + badResponse.StatusCode,
+                            CreatedDate = DateTimeHelpers.ConvertDateTimeToString(DateTime.UtcNow),
+                            HttpMethod = "GET",
+                            ApiName = "Cases - List Custom Fields",
+                            Endpoint = endpoint
+                        };
+                    }
+                }
+                return null;
+            }
+            catch (Exception ex)
+            {
+                return null;
+            }
+            finally
+            {
+                if (apiLogging != null)
+                {
+                    await _loggingRepository.CreateApiLogging(apiLogging);
+                }
+
+            }
+        }
+
+        public async Task<ApiResultDto<CasesListNotesResponse>> CasesListNotes(string caseId)
+        {
+            ApiLogging apiLogging = null;
+            string endpoint = string.Empty;
+            var apiResult = new ApiResultDto<CasesListNotesResponse>();
+            try
+            {
+
+                endpoint = $"{CompleteASAPConstants.HoowlaApiEndpointV2}/cases/notes/?case={caseId}" +
+                    $"&key={CompleteASAPConstants.HoowlaApiKey}&user={CompleteASAPConstants.HoowlaRoxusEmail}";
+                var request = new HttpRequestMessage(
+                           HttpMethod.Get,
+                           endpoint);
+                using var httpClient = new HttpClient();
+                using var response = await httpClient.SendAsync(request,
+                           HttpCompletionOption.ResponseHeadersRead);
+                response.EnsureSuccessStatusCode();
+                var stream = await response.Content.ReadAsStreamAsync();
+                // Convert stream to string
+                var reader = new StreamReader(stream);
+                string responseData = reader.ReadToEnd();
+                if (response.StatusCode == HttpStatusCode.OK)
+                {
+                    var responseObj = JsonConvert.DeserializeObject<List<Models.CompleteASAP.Hoowla.HoowlaNoteDetails>>(responseData);
+                    apiResult.Code = ResultCode.OK;
+                    apiResult.Message = ZohoConstants.MSG_200;
+                    var casesListNotesResponse = new CasesListNotesResponse
+                    {
+                        Notes = responseObj
+                    };
+                    apiResult.Data = casesListNotesResponse;
+                }
+
+                if (response.StatusCode == HttpStatusCode.NoContent)
+                {
+                    apiResult.Code = ResultCode.NoContent;
+                    apiResult.Message = ZohoConstants.MSG_204;
+                }
+                // HANDLE LOGGING TO DATABASE
+                apiLogging = new ApiLogging()
+                {
+                    Id = Guid.NewGuid().ToString(),
+                    Response = responseData,
+                    ApplicationName = "Hoowla",
+                    CustomerName = "CompleteASAP",
+                    Status = (int)response.StatusCode + " " + response.StatusCode,
+                    CreatedDate = DateTimeHelpers.ConvertDateTimeToString(DateTime.UtcNow),
+                    HttpMethod = "GET",
+                    ApiName = "Cases - List Notes",
+                    Endpoint = endpoint
+                };
+                return apiResult;
+            }
+            catch (WebException ex)
+            {
+                HttpWebResponse badResponse = (HttpWebResponse)ex.Response;
+                using (Stream responseStream = badResponse.GetResponseStream())
+                {
+                    if (responseStream != null)
+                    {
+                        using var reader = new StreamReader(responseStream);
+                        string responseData = reader.ReadToEnd();
+                        apiLogging = new ApiLogging()
+                        {
+                            Id = Guid.NewGuid().ToString(),
+                            Response = responseData,
+                            ApplicationName = "Hoowla",
+                            CustomerName = "CompleteASAP",
+                            Status = (int)badResponse.StatusCode + " " + badResponse.StatusCode,
+                            CreatedDate = DateTimeHelpers.ConvertDateTimeToString(DateTime.UtcNow),
+                            HttpMethod = "GET",
+                            ApiName = "Cases - List Notes",
+                            Endpoint = endpoint
+                        };
+                    }
+                }
+                return null;
+            }
+            catch (Exception ex)
+            {
+                return null;
+            }
+            finally
+            {
+                if (apiLogging != null)
+                {
+                    await _loggingRepository.CreateApiLogging(apiLogging);
+                }
+
+            }
+        }
+
+        public async Task<ApiResultDto<CasesListTasksResponse>> CasesListTasks(string caseId)
+        {
+            ApiLogging apiLogging = null;
+            string endpoint = string.Empty;
+            var apiResult = new ApiResultDto<CasesListTasksResponse>();
+            try
+            {
+
+                endpoint = $"{CompleteASAPConstants.HoowlaApiEndpointV2}/cases/tasks/?case={caseId}" +
+                    $"&key={CompleteASAPConstants.HoowlaApiKey}&user={CompleteASAPConstants.HoowlaRoxusEmail}";
+                var request = new HttpRequestMessage(
+                           HttpMethod.Get,
+                           endpoint);
+                using var httpClient = new HttpClient();
+                using var response = await httpClient.SendAsync(request,
+                           HttpCompletionOption.ResponseHeadersRead);
+                response.EnsureSuccessStatusCode();
+                var stream = await response.Content.ReadAsStreamAsync();
+                // Convert stream to string
+                var reader = new StreamReader(stream);
+                string responseData = reader.ReadToEnd();
+                if (response.StatusCode == HttpStatusCode.OK)
+                {
+                    var responseObj = JsonConvert.DeserializeObject<List<Models.CompleteASAP.Hoowla.HoowlaTaskDetails>>(responseData);
+                    apiResult.Code = ResultCode.OK;
+                    apiResult.Message = ZohoConstants.MSG_200;
+                    var casesListNotesResponse = new CasesListTasksResponse
+                    {
+                        Tasks = responseObj
+                    };
+                    apiResult.Data = casesListNotesResponse;
+                }
+
+                if (response.StatusCode == HttpStatusCode.NoContent)
+                {
+                    apiResult.Code = ResultCode.NoContent;
+                    apiResult.Message = ZohoConstants.MSG_204;
+                }
+                // HANDLE LOGGING TO DATABASE
+                apiLogging = new ApiLogging()
+                {
+                    Id = Guid.NewGuid().ToString(),
+                    Response = responseData,
+                    ApplicationName = "Hoowla",
+                    CustomerName = "CompleteASAP",
+                    Status = (int)response.StatusCode + " " + response.StatusCode,
+                    CreatedDate = DateTimeHelpers.ConvertDateTimeToString(DateTime.UtcNow),
+                    HttpMethod = "GET",
+                    ApiName = "Cases - List Tasks",
+                    Endpoint = endpoint
+                };
+                return apiResult;
+            }
+            catch (WebException ex)
+            {
+                HttpWebResponse badResponse = (HttpWebResponse)ex.Response;
+                using (Stream responseStream = badResponse.GetResponseStream())
+                {
+                    if (responseStream != null)
+                    {
+                        using var reader = new StreamReader(responseStream);
+                        string responseData = reader.ReadToEnd();
+                        apiLogging = new ApiLogging()
+                        {
+                            Id = Guid.NewGuid().ToString(),
+                            Response = responseData,
+                            ApplicationName = "Hoowla",
+                            CustomerName = "CompleteASAP",
+                            Status = (int)badResponse.StatusCode + " " + badResponse.StatusCode,
+                            CreatedDate = DateTimeHelpers.ConvertDateTimeToString(DateTime.UtcNow),
+                            HttpMethod = "GET",
+                            ApiName = "Cases - List Tasks",
+                            Endpoint = endpoint
+                        };
+                    }
+                }
+                return null;
+            }
+            catch (Exception ex)
+            {
+                return null;
+            }
+            finally
+            {
+                if (apiLogging != null)
+                {
+                    await _loggingRepository.CreateApiLogging(apiLogging);
+                }
+
+            }
+        }
+
+        public async Task<ApiResultDto<GetPersonByIdResponse>> GetPersonById(string personId)
+        {
+
+            ApiLogging apiLogging = null;
+            string endpoint = string.Empty;
+            var apiResult = new ApiResultDto<GetPersonByIdResponse>();
+            try
+            {
+
+                endpoint = $"{CompleteASAPConstants.HoowlaApiEndpointV2}/people/person?id={personId}" +
+                    $"&key={CompleteASAPConstants.HoowlaApiKey}&user={CompleteASAPConstants.HoowlaRoxusEmail}";
+                var request = new HttpRequestMessage(
+                           HttpMethod.Get,
+                           endpoint);
+                using var httpClient = new HttpClient();
+                using var response = await httpClient.SendAsync(request,
+                           HttpCompletionOption.ResponseHeadersRead);
+                response.EnsureSuccessStatusCode();
+                var stream = await response.Content.ReadAsStreamAsync();
+                // Convert stream to string
+                var reader = new StreamReader(stream);
+                string responseData = reader.ReadToEnd();
+                if (response.StatusCode == HttpStatusCode.OK)
+                {
+                    var responseObj = JsonConvert.DeserializeObject<GetPersonByIdResponse>(responseData);
+                    apiResult.Code = ResultCode.OK;
+                    apiResult.Message = ZohoConstants.MSG_200;
+                    apiResult.Data = responseObj;
+                }
+
+                if (response.StatusCode == HttpStatusCode.NoContent)
+                {
+                    apiResult.Code = ResultCode.NoContent;
+                    apiResult.Message = ZohoConstants.MSG_204;
+                }
+                // HANDLE LOGGING TO DATABASE
+                apiLogging = new ApiLogging()
+                {
+                    Id = Guid.NewGuid().ToString(),
+                    Response = responseData,
+                    ApplicationName = "Hoowla",
+                    CustomerName = "CompleteASAP",
+                    Status = (int)response.StatusCode + " " + response.StatusCode,
+                    CreatedDate = DateTimeHelpers.ConvertDateTimeToString(DateTime.UtcNow),
+                    HttpMethod = "GET",
+                    ApiName = "People - Get a Person Card",
+                    Endpoint = endpoint
+                };
+                return apiResult;
+            }
+            catch (WebException ex)
+            {
+                HttpWebResponse badResponse = (HttpWebResponse)ex.Response;
+                using (Stream responseStream = badResponse.GetResponseStream())
+                {
+                    if (responseStream != null)
+                    {
+                        using var reader = new StreamReader(responseStream);
+                        string responseData = reader.ReadToEnd();
+                        apiLogging = new ApiLogging()
+                        {
+                            Id = Guid.NewGuid().ToString(),
+                            Response = responseData,
+                            ApplicationName = "Hoowla",
+                            CustomerName = "CompleteASAP",
+                            Status = (int)badResponse.StatusCode + " " + badResponse.StatusCode,
+                            CreatedDate = DateTimeHelpers.ConvertDateTimeToString(DateTime.UtcNow),
+                            HttpMethod = "GET",
+                            ApiName = "People - Get a Person Card",
+                            Endpoint = endpoint
+                        };
+                    }
+                }
+                return null;
+            }
+            catch (Exception ex)
+            {
+                return null;
+            }
+            finally
+            {
+                if (apiLogging != null)
+                {
+                    await _loggingRepository.CreateApiLogging(apiLogging);
+                }
+
+            }
+        }
+
+        public async Task<ApiResultDto<GetPersonByEmailResponse>> GetPersonByEmail
+            (GetPersonByEmailRequest getPersonByEmailRequest)
+        {
+
+            ApiLogging apiLogging = null;
+            string endpoint = string.Empty;
+            var apiResult = new ApiResultDto<GetPersonByEmailResponse>();
+            try
+            {
+
+                string email = getPersonByEmailRequest.Email;
+
+                endpoint = $"{CompleteASAPConstants.HoowlaApiEndpointV2}/people/person/byemail?email={email}" +
+                    $"&key={CompleteASAPConstants.HoowlaApiKey}&user={CompleteASAPConstants.HoowlaRoxusEmail}";
+                var request = new HttpRequestMessage(
+                           HttpMethod.Get,
+                           endpoint);
+                using var httpClient = new HttpClient();
+                using var response = await httpClient.SendAsync(request,
+                           HttpCompletionOption.ResponseHeadersRead);
+                response.EnsureSuccessStatusCode();
+                var stream = await response.Content.ReadAsStreamAsync();
+                // Convert stream to string
+                var reader = new StreamReader(stream);
+                string responseData = reader.ReadToEnd();
+                if (response.StatusCode == HttpStatusCode.OK)
+                {
+                    var responseObj = JsonConvert.DeserializeObject<List<EmailPersonDetails>>(responseData);
+                    var getPersonsByEmailResponse = new GetPersonByEmailResponse();
+                    getPersonsByEmailResponse.EmailPersons = responseObj;
+
+                    apiResult.Code = ResultCode.OK;
+                    apiResult.Message = ZohoConstants.MSG_200;
+                    apiResult.Data = getPersonsByEmailResponse;
+                }
+
+                if (response.StatusCode == HttpStatusCode.NoContent)
+                {
+                    apiResult.Code = ResultCode.NoContent;
+                    apiResult.Message = ZohoConstants.MSG_204;
+                }
+                // HANDLE LOGGING TO DATABASE
+                apiLogging = new ApiLogging()
+                {
+                    Id = Guid.NewGuid().ToString(),
+                    Response = responseData,
+                    ApplicationName = "Hoowla",
+                    CustomerName = "CompleteASAP",
+                    Status = (int)response.StatusCode + " " + response.StatusCode,
+                    CreatedDate = DateTimeHelpers.ConvertDateTimeToString(DateTime.UtcNow),
+                    HttpMethod = "GET",
+                    ApiName = "People - Get Person Card(s) by Email",
+                    Endpoint = endpoint
+                };
+                return apiResult;
+            }
+            catch (WebException ex)
+            {
+                HttpWebResponse badResponse = (HttpWebResponse)ex.Response;
+                using (Stream responseStream = badResponse.GetResponseStream())
+                {
+                    if (responseStream != null)
+                    {
+                        using var reader = new StreamReader(responseStream);
+                        string responseData = reader.ReadToEnd();
+                        apiLogging = new ApiLogging()
+                        {
+                            Id = Guid.NewGuid().ToString(),
+                            Response = responseData,
+                            ApplicationName = "Hoowla",
+                            CustomerName = "CompleteASAP",
+                            Status = (int)badResponse.StatusCode + " " + badResponse.StatusCode,
+                            CreatedDate = DateTimeHelpers.ConvertDateTimeToString(DateTime.UtcNow),
+                            HttpMethod = "GET",
+                            ApiName = "People - Get Person Card(s) by Email",
+                            Endpoint = endpoint
+                        };
+                    }
+                }
+                return null;
+            }
+            catch (Exception ex)
+            {
+                return null;
+            }
+            finally
+            {
+                if (apiLogging != null)
+                {
+                    await _loggingRepository.CreateApiLogging(apiLogging);
+                }
+
+            }
+
+        }
+
+        public async Task<ApiResultDto<PeopleCreateAPersonCardResponse>> 
+            PeopleCreateAPersonCard(PeopleCreateAPersonCardRequest createPersonCardRequest)
+        {
+
+            ApiLogging apiLogging = null;
+            string endpoint = string.Empty;
+            var apiResult = new ApiResultDto<PeopleCreateAPersonCardResponse>();
+
+            try
+            {
+
+                endpoint = $"{CompleteASAPConstants.HoowlaApiEndpointV2}/people/person?" +
+                    $"key={CompleteASAPConstants.HoowlaApiKey}&user={CompleteASAPConstants.HoowlaRoxusEmail}";
+
+                string requestBody = JsonConvert.SerializeObject(createPersonCardRequest);
+
+                var request = new HttpRequestMessage(
+                           HttpMethod.Post,
+                           endpoint)
+                {
+                    Content = new StringContent(requestBody, Encoding.UTF8, "application/json")
+                };
+
+                using var httpClient = new HttpClient();
+                using var response = await httpClient.SendAsync(request,
+                           HttpCompletionOption.ResponseHeadersRead);
+                // response.EnsureSuccessStatusCode();
+                var stream = await response.Content.ReadAsStreamAsync();
+                // Convert stream to string
+                var reader = new StreamReader(stream);
+                string responseData = reader.ReadToEnd();
+                if (response.StatusCode == HttpStatusCode.OK || 
+                    response.StatusCode == HttpStatusCode.Created)
+                {
+                    var responseObj = JsonConvert.DeserializeObject
+                        <PeopleCreateAPersonCardResponse>(responseData);
+                    apiResult.Code = ResultCode.OK;
+                    apiResult.Message = ZohoConstants.MSG_200;
+                    apiResult.Data = responseObj;
+                }
+
+                if (response.StatusCode == HttpStatusCode.NoContent)
+                {
+                    apiResult.Code = ResultCode.NoContent;
+                    apiResult.Message = ZohoConstants.MSG_204;
+                }
+                // HANDLE LOGGING TO DATABASE
+                apiLogging = new ApiLogging()
+                {
+                    Id = Guid.NewGuid().ToString(),
+                    Response = responseData,
+                    ApplicationName = "Hoowla",
+                    CustomerName = "CompleteASAP",
+                    Status = (int)response.StatusCode + " " + response.StatusCode,
+                    CreatedDate = DateTimeHelpers.ConvertDateTimeToString(DateTime.UtcNow),
+                    HttpMethod = "POST",
+                    ApiName = "People - Create a Person Card",
+                    Endpoint = endpoint
+                };
+                return apiResult;
+            }
+            catch (WebException ex)
+            {
+                HttpWebResponse badResponse = (HttpWebResponse)ex.Response;
+                using (Stream responseStream = badResponse.GetResponseStream())
+                {
+                    if (responseStream != null)
+                    {
+                        using var reader = new StreamReader(responseStream);
+                        string responseData = reader.ReadToEnd();
+                        apiLogging = new ApiLogging()
+                        {
+                            Id = Guid.NewGuid().ToString(),
+                            Response = responseData,
+                            ApplicationName = "Hoowla",
+                            CustomerName = "CompleteASAP",
+                            Status = (int)badResponse.StatusCode + " " + badResponse.StatusCode,
+                            CreatedDate = DateTimeHelpers.ConvertDateTimeToString(DateTime.UtcNow),
+                            HttpMethod = "POST",
+                            ApiName = "People - Create a Person Card",
+                            Endpoint = endpoint
+                        };
+                    }
+                }
+                return null;
+            }
+            catch (Exception ex)
+            {
+                return null;
+            }
+            finally
+            {
+                if (apiLogging != null)
+                {
+                    await _loggingRepository.CreateApiLogging(apiLogging);
+                }
+
+            }
+
+        }
+
+        public async Task<ApiResultDto<PeopleAddRelationshipToPersonResponse>> 
+            PeopleAddRelationshipToPerson(PeopleAddRelationshipToPersonRequest addRelationshipRequest)
+        {
+
+            ApiLogging apiLogging = null;
+            string endpoint = string.Empty;
+            var apiResult = new ApiResultDto<PeopleAddRelationshipToPersonResponse>();
+
+            try
+            {
+
+                endpoint = $"{CompleteASAPConstants.HoowlaApiEndpointV2}/people/person/relationships?" +
+                    $"key={CompleteASAPConstants.HoowlaApiKey}&user={CompleteASAPConstants.HoowlaRoxusEmail}";
+
+                string requestBody = JsonConvert.SerializeObject(addRelationshipRequest);
+
+                var request = new HttpRequestMessage(
+                           HttpMethod.Post,
+                           endpoint)
+                {
+                    Content = new StringContent(requestBody, Encoding.UTF8, "application/json")
+                };
+
+                using var httpClient = new HttpClient();
+                using var response = await httpClient.SendAsync(request,
+                           HttpCompletionOption.ResponseHeadersRead);
+                response.EnsureSuccessStatusCode();
+                var stream = await response.Content.ReadAsStreamAsync();
+                // Convert stream to string
+                var reader = new StreamReader(stream);
+                string responseData = reader.ReadToEnd();
+                if (response.StatusCode == HttpStatusCode.OK)
+                {
+                    var responseObj = JsonConvert.DeserializeObject
+                        <PeopleAddRelationshipToPersonResponse>(responseData);
+                    apiResult.Code = ResultCode.OK;
+                    apiResult.Message = ZohoConstants.MSG_200;
+                    apiResult.Data = responseObj;
+                }
+
+                if (response.StatusCode == HttpStatusCode.NoContent)
+                {
+                    apiResult.Code = ResultCode.NoContent;
+                    apiResult.Message = ZohoConstants.MSG_204;
+                }
+                // HANDLE LOGGING TO DATABASE
+                apiLogging = new ApiLogging()
+                {
+                    Id = Guid.NewGuid().ToString(),
+                    Response = responseData,
+                    ApplicationName = "Hoowla",
+                    CustomerName = "CompleteASAP",
+                    Status = (int)response.StatusCode + " " + response.StatusCode,
+                    CreatedDate = DateTimeHelpers.ConvertDateTimeToString(DateTime.UtcNow),
+                    HttpMethod = "POST",
+                    ApiName = "People - Add Relationship to Person",
+                    Endpoint = endpoint
+                };
+                return apiResult;
+            }
+            catch (WebException ex)
+            {
+                HttpWebResponse badResponse = (HttpWebResponse)ex.Response;
+                using (Stream responseStream = badResponse.GetResponseStream())
+                {
+                    if (responseStream != null)
+                    {
+                        using var reader = new StreamReader(responseStream);
+                        string responseData = reader.ReadToEnd();
+                        apiLogging = new ApiLogging()
+                        {
+                            Id = Guid.NewGuid().ToString(),
+                            Response = responseData,
+                            ApplicationName = "Hoowla",
+                            CustomerName = "CompleteASAP",
+                            Status = (int)badResponse.StatusCode + " " + badResponse.StatusCode,
+                            CreatedDate = DateTimeHelpers.ConvertDateTimeToString(DateTime.UtcNow),
+                            HttpMethod = "POST",
+                            ApiName = "People - Create a Person Card",
+                            Endpoint = endpoint
+                        };
+                    }
+                }
+                return null;
+            }
+            catch (Exception ex)
+            {
+                return null;
+            }
+            finally
+            {
+                if (apiLogging != null)
+                {
+                    await _loggingRepository.CreateApiLogging(apiLogging);
+                }
+
+            }
+        }
+
+    }
+
+}

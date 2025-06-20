@@ -28,6 +28,8 @@ namespace RoxusZohoAPI.Contexts
 
         public DbSet<DocmailRecord> DocmailRecords { get; set; }
 
+        public DbSet<IntegrationLog> IntegrationLogs { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<TrenchesTask>().HasKey(t => new { t.TaskId, t.ProjectId });

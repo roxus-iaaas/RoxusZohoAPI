@@ -50,16 +50,23 @@ namespace RoxusZohoAPI.Services.MicrosoftGraph
                 string clientId = appConfig.ClientId;
                 string clientSecret = appConfig.ClientSecret;
                 string grantType = "refresh_token";
+                string redirectUri = appConfig.RedirectUri;
+                if (string.IsNullOrEmpty(redirectUri))
+                {
+                    redirectUri = "https://roxus.io/";
+                }    
 
                 string endpoint = authEndpoint;
 
-                var dict = new Dictionary<string, string>();
-                dict.Add("client_id", clientId);
-                dict.Add("scope", "offline_access Sites.Manage.All");
-                dict.Add("refresh_token", refreshToken);
-                dict.Add("redirect_uri", "https://roxus.io/");
-                dict.Add("grant_type", grantType);
-                dict.Add("client_secret", clientSecret);
+                var dict = new Dictionary<string, string>
+                {
+                    { "client_id", clientId },
+                    { "scope", "offline_access Sites.Manage.All" },
+                    { "refresh_token", refreshToken },
+                    { "redirect_uri", redirectUri },
+                    { "grant_type", grantType },
+                    { "client_secret", clientSecret }
+                };
 
                 var request = new HttpRequestMessage(
                            HttpMethod.Post,
@@ -90,7 +97,7 @@ namespace RoxusZohoAPI.Services.MicrosoftGraph
                     appConfig.ExpiredTime = newExpiredTime;
                     appConfig.RefreshToken = newRefreshToken;
 
-                    await _roxusRepository.UpdateAccessTokenAndExpiredTime(appConfig.Id, accessToken, newExpiredTime);
+                    await _roxusRepository.UpdateTokenAndExpiredTime(appConfig.Id, accessToken, newExpiredTime);
 
                     return appConfig;
                 }

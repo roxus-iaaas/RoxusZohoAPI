@@ -11,13 +11,20 @@ using RoxusWebAPI.Services.Zoho.ZohoProjects;
 using RoxusZohoAPI.Contexts;
 using RoxusZohoAPI.Repositories;
 using RoxusZohoAPI.Services.CompaniesHouse;
+using RoxusZohoAPI.Services.CompleteASAP;
+using RoxusZohoAPI.Services.Contxtus;
 using RoxusZohoAPI.Services.Hinets;
 using RoxusZohoAPI.Services.MicrosoftGraph;
 using RoxusZohoAPI.Services.Nimbus;
+using RoxusZohoAPI.Services.Nintex;
+using RoxusZohoAPI.Services.Nuvoli;
+using RoxusZohoAPI.Services.Nuvoli.Halo;
+using RoxusZohoAPI.Services.PureFinance;
 using RoxusZohoAPI.Services.ThorneWidgery;
 using RoxusZohoAPI.Services.TrenchesReporting;
 using RoxusZohoAPI.Services.Zoho;
 using RoxusZohoAPI.Services.Zoho.ZohoCRM;
+using RoxusZohoAPI.Services.Zoho.ZohoDesk;
 using Syncfusion.Licensing;
 using System;
 
@@ -106,7 +113,33 @@ namespace RoxusZohoAPI
             services.AddScoped<ICompaniesHouseService, CompaniesHouseService>();
             services.AddScoped<IZohoOpenreachService, ZohoOpenreachService>();
             services.AddScoped<IZohoNoteService, ZohoNoteService>();
+            services.AddScoped<IZohoDeskService, ZohoDeskService>();
+            services.AddScoped<INintexService, NintexService>();
+            services.AddScoped<IContxtusService, ContxtusService>();
+
             services.AddScoped<IMicrosoftGraphAuthService, MicrosoftGraphAuthService>();
+            services.AddScoped<ISharePointService, SharePointService>();
+
+            #region Pure Finance
+
+            services.AddScoped<IAirtableService, AirtableService>();
+            services.AddScoped<IPipedriveService, PipedriveService>();
+            services.AddScoped<IPureFinanceCustomService, PureFinanceCustomService>();
+
+            #endregion
+
+            #region Nuvoli
+
+            services.AddScoped<IHaloService, HaloService>();
+            services.AddScoped<INuvoliCustomService, NuvoliCustomService>();
+
+            #endregion
+
+            #region CompleteASAP
+
+            services.AddScoped<IHoowlaService, HoowlaService>();
+
+            #endregion
 
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
             services.AddSwaggerGen(c =>

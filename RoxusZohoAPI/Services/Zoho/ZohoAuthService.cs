@@ -81,7 +81,7 @@ namespace RoxusZohoAPI.Services.Zoho
                     appConfig.AccessToken = accessToken;
                     appConfig.ExpiredTime = newExpiredTime;
 
-                    await _roxusRepository.UpdateAccessTokenAndExpiredTime(appConfig.Id, accessToken, newExpiredTime);
+                    await _roxusRepository.UpdateTokenAndExpiredTime(appConfig.Id, accessToken, newExpiredTime);
 
                     // HANDLE LOGGING TO DATABASE
                     apiLogging = new ApiLogging()

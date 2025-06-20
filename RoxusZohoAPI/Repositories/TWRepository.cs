@@ -8,8 +8,10 @@ using System.Threading.Tasks;
 
 namespace RoxusZohoAPI.Repositories
 {
+
     public class TWRepository : ITWRepository
     {
+
         private readonly RoxusContext _roxusContext;
 
         public TWRepository(RoxusContext roxusContext)
@@ -19,6 +21,7 @@ namespace RoxusZohoAPI.Repositories
 
         public async Task<IEnumerable<TWPowerBIRecord>> GetFailedRecords()
         {
+            
             int currentHour = DateTime.UtcNow.Hour;
             string currentDate = DateTime.UtcNow.ToString("yyyy/MM/dd");
             if (currentHour >= 0 && currentHour <= 10)
@@ -31,12 +34,15 @@ namespace RoxusZohoAPI.Repositories
                 return await _roxusContext.TWPowerBIRecords
                     .FromSqlRaw($"SELECT * FROM TW_PowerBIRecords WHERE IsSuccess = 0 AND StartTime >= '{currentDate} 10:00:00' AND StartTime < '{currentDate} 20:00:00';").ToListAsync();
             }
+
         }
 
         public async Task<IEnumerable<TWPowerBIRecord>> GetSuccessfulRecords()
         {
+
             int currentHour = DateTime.UtcNow.Hour;
             string currentDate = DateTime.UtcNow.ToString("yyyy/MM/dd");
+            
             if (currentHour >= 18 && currentHour <= 23)
             {
                 return await _roxusContext.TWPowerBIRecords
@@ -47,6 +53,8 @@ namespace RoxusZohoAPI.Repositories
                 return await _roxusContext.TWPowerBIRecords
                     .FromSqlRaw($"SELECT * FROM TW_PowerBIRecords WHERE IsSuccess = 1 AND StartTime >= '{currentDate} 09:00:00' AND StartTime < '{currentDate} 14:59:59';").ToListAsync();
             }
+
         }
+
     }
 }

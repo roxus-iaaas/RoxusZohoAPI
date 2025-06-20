@@ -66,7 +66,7 @@ namespace RoxusZohoAPI.Repositories
                 .FirstOrDefaultAsync();
         }
 
-        public async Task UpdateAccessTokenAndExpiredTime(string id, string accessToken, string newExpiredTime, string refreshToken = "")
+        public async Task UpdateTokenAndExpiredTime(string id, string accessToken, string newExpiredTime, string refreshToken = "")
         {
             try
             {
@@ -146,6 +146,70 @@ namespace RoxusZohoAPI.Repositories
 
             return await _roxusContext.DocmailRecords.Where(d => EF.Functions.Like(d.MailingReference, $"%{smNumber}%")
                 && !string.IsNullOrEmpty(d.BlobUrl)).ToListAsync();
+        }
+
+        #endregion
+
+        #region Integration Logs
+
+        public async Task<IEnumerable<IntegrationLog>> GetIntegrationLogs()
+        {
+
+            return await _roxusContext.IntegrationLogs.ToListAsync();
+
+        }
+
+        public async Task CreateIntegrationLog(IntegrationLog integrationLog)
+        {
+
+            if (integrationLog == null)
+            {
+                return;
+            }
+            _roxusContext.IntegrationLogs.Add(integrationLog);
+            await _roxusContext.SaveChangesAsync();
+
+        }
+
+        public async Task<IntegrationLog> GetLatestIntegrationLogByCursor(string customerName, string platformName)
+        {
+
+            return await _roxusContext.IntegrationLogs
+                .Where(l => l.CustomerName.ToString() == customerName && l.PlatformName == platformName)
+                .OrderByDescending(l => l.WebhookCursor)
+                .FirstOrDefaultAsync();
+
+        }
+
+        public async Task UpdateIntegrationLog(int webhookCursor, string output, string result
+            , string input1 = "", string input2 = "", string input3 = "", string input4 = "", string input5 = ""
+            , string input6 = "", string input7 = "", string input8 = "", string input9 = "", string input10 = "")
+        {
+
+            var integrationLog = await _roxusContext.IntegrationLogs.FirstOrDefaultAsync(a => a.WebhookCursor == webhookCursor);
+            integrationLog.OutputSummary = output;
+            integrationLog.Result = result;
+            integrationLog.ModifiedTime = DateTime.UtcNow;
+            integrationLog.Input1 = input1;
+            integrationLog.Input2 = input2;
+            integrationLog.Input3 = input3;
+            integrationLog.Input4 = input4;
+            integrationLog.Input5 = input5;
+            integrationLog.Input6 = input6;
+            integrationLog.Input7 = input7;
+            integrationLog.Input8 = input8;
+            integrationLog.Input9 = input9;
+            integrationLog.Input10 = input10;
+
+            await _roxusContext.SaveChangesAsync();
+
+        }
+
+        public async Task<IEnumerable<IntegrationLog>> GetEmptyIntegrationLogs()
+        {
+            var logs = await _roxusContext.IntegrationLogs
+                .Where(l => string.IsNullOrEmpty(l.Input1)).ToListAsync();
+            return logs;
         }
 
         #endregion

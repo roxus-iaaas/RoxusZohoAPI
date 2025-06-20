@@ -1,4 +1,5 @@
 ﻿using RoxusZohoAPI.Helpers.Constants;
+using RoxusZohoAPI.Models.DateTimeCalculation;
 using System;
 
 namespace RoxusZohoAPI.Helpers
@@ -95,6 +96,60 @@ namespace RoxusZohoAPI.Helpers
             {
                 return monthDiff;
             }
+        }
+
+        public static DateTime AddWorkingDays(DateTime startDate, int workingDays)
+        {
+            int addedDays = 0;
+            DateTime currentDate = startDate;
+
+            while (addedDays < workingDays)
+            {
+                currentDate = currentDate.AddDays(1);
+
+                // Check if it's a weekday
+                if (currentDate.DayOfWeek != DayOfWeek.Saturday && currentDate.DayOfWeek != DayOfWeek.Sunday)
+                {
+                    addedDays++;
+                }
+            }
+
+            return currentDate;
+        }
+
+        public static string GetCurrentTime(GetCurrentTimeRequest request)
+        {
+            string timeZone = request.TimeZone;
+            string format = request.Format;
+            int? addDay = request.AddDay;
+
+            DateTime dateTime = DateTime.UtcNow;
+
+            string defaultFormat = "yyyy-MM-dd HH:mm:ss";
+
+            if (!string.IsNullOrEmpty(timeZone))
+            {
+                var zone = TimeZoneInfo.FindSystemTimeZoneById(timeZone);
+                dateTime = TimeZoneInfo.ConvertTimeFromUtc(dateTime, zone);
+            }
+
+            if (addDay.HasValue)
+            {
+                dateTime = AddWorkingDays(dateTime, addDay.Value);
+            }    
+
+            string dateTimeStr;
+            if (!string.IsNullOrEmpty(format))
+            {
+                dateTimeStr = dateTime.ToString(format);
+            }
+            else
+            {
+                dateTimeStr = dateTime.ToString(defaultFormat);
+            }
+
+            return dateTimeStr;
+
         }
 
     }
