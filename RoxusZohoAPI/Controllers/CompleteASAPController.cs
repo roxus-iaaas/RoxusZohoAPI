@@ -397,6 +397,33 @@ namespace RoxusZohoAPI.Controllers
                 return BadRequest(apiResultDto);
             }
         }
+
+        [HttpPost("cases/create-note")]
+        public async Task<IActionResult> CasesCreateANote([FromBody] CasesCreateANoteRequest request)
+        {
+            var apiResultDto = new ApiResultDto<CasesCreateANoteResponse>()
+            {
+                Code = ResultCode.BadRequest,
+                Message = CompleteASAPConstants.PCAPC_400,
+                Data = null
+            };
+
+            try
+            {
+                apiResultDto = await _hoowlaService.CasesCreateANote(request);
+
+                if (apiResultDto.Code == ResultCode.OK)
+                {
+                    return Ok(apiResultDto);
+                }
+
+                return BadRequest(apiResultDto);
+            }
+            catch (Exception)
+            {
+                return BadRequest(apiResultDto);
+            }
+        }
         #endregion
 
         [HttpPost("person/byemail")]
