@@ -771,7 +771,7 @@ namespace RoxusZohoAPI.Services.CompleteASAP
                             Status = (int)badResponse.StatusCode + " " + badResponse.StatusCode,
                             CreatedDate = DateTimeHelpers.ConvertDateTimeToString(DateTime.UtcNow),
                             HttpMethod = "POST",
-                            ApiName = "People - Create a Person Card",
+                            ApiName = "Cases - Create a new Case",
                             Endpoint = endpoint
                         };
                     }
