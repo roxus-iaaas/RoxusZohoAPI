@@ -110,6 +110,7 @@ namespace RoxusZohoAPI.Controllers
             }
         }
 
+        #region Cases
         [HttpGet("case/{caseId}")]
         public async Task<IActionResult> CasesViewACase(string caseId)
         {
@@ -342,6 +343,34 @@ namespace RoxusZohoAPI.Controllers
             }
 
         }
+
+        [HttpPost("cases/create")]
+        public async Task<IActionResult> CasesCreateANewCase ([FromBody] CasesCreateANewCaseRequest request)
+        {
+            var apiResultDto = new ApiResultDto<CasesCreateANewCaseResponse>()
+            {
+                Code = ResultCode.BadRequest,
+                Message = CompleteASAPConstants.PCAPC_400,
+                Data = null
+            };
+
+            try
+            {
+                apiResultDto = await _hoowlaService.CasesCreateANewCase(request);
+
+                if (apiResultDto.Code == ResultCode.OK)
+                {
+                    return Ok(apiResultDto);
+                }
+
+                return BadRequest(apiResultDto);
+            }
+            catch (Exception)
+            {
+                return BadRequest(apiResultDto);
+            }
+        }
+        #endregion
 
         [HttpPost("person/byemail")]
         public async Task<IActionResult> GetPersonByEmail
