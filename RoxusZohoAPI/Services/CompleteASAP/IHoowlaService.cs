@@ -31,6 +31,9 @@ namespace RoxusZohoAPI.Services.CompleteASAP
         Task<ApiResultDto<CasesCreateANewCaseResponse>> CasesCreateANewCase
             (CasesCreateANewCaseRequest casesCreateANewCaseRequest);
 
+        Task<ApiResultDto<CasesAddPersonToACaseResponse>> CasesAddPersonToACase
+            (CasesAddPersonToACaseRequest casesAddPersonToACaseRequest);
+
         Task<ApiResultDto<GetPersonByIdResponse>> GetPersonById(string personId);
 
         Task<ApiResultDto<GetPersonByEmailResponse>> GetPersonByEmail
