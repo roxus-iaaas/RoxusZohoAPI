@@ -344,13 +344,13 @@ namespace RoxusZohoAPI.Controllers
 
         }
 
-        [HttpPost("cases/create")]
+        [HttpPost("cases/create-case")]
         public async Task<IActionResult> CasesCreateANewCase ([FromBody] CasesCreateANewCaseRequest request)
         {
             var apiResultDto = new ApiResultDto<CasesCreateANewCaseResponse>()
             {
                 Code = ResultCode.BadRequest,
-                Message = CompleteASAPConstants.PCAPC_400,
+                Message = CompleteASAPConstants.CCNC_400,
                 Data = null
             };
 
@@ -377,7 +377,7 @@ namespace RoxusZohoAPI.Controllers
             var apiResultDto = new ApiResultDto<CasesAddPersonToACaseResponse>()
             {
                 Code = ResultCode.BadRequest,
-                Message = CompleteASAPConstants.PCAPC_400,
+                Message = CompleteASAPConstants.CAPTC_400,
                 Data = null
             };
 
@@ -404,7 +404,7 @@ namespace RoxusZohoAPI.Controllers
             var apiResultDto = new ApiResultDto<CasesCreateANoteResponse>()
             {
                 Code = ResultCode.BadRequest,
-                Message = CompleteASAPConstants.PCAPC_400,
+                Message = CompleteASAPConstants.CCN_400,
                 Data = null
             };
 

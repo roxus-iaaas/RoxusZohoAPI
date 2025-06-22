@@ -68,6 +68,24 @@
 
         public const string CLT_400 = "Cases - List Tasks FAILED";
 
+        // CCNC: Cases - Create a new Case
+
+        public const string CCNC_200 = "Cases - Create a new Case SUCCESSFULLY";
+
+        public const string CCNC_400 = "Cases - Create a new Case FAILED";
+
+        // CAPTC: Cases - Add Person to Case
+
+        public const string CAPTC_200 = "Cases - Add Person to Case SUCCESSFULLY";
+
+        public const string CAPTC_400 = "Cases - Add Person to Case FAILED";
+
+        // CCN: Cases - Create a Note
+
+        public const string CCN_200 = "Cases - Create a Note SUCCESSFULLY";
+
+        public const string CCN_400 = "Cases - Create a Note FAILED";
+
         // PCAPC: People - Create a Person Card
 
         public const string PCAPC_200 = "People - Create a Person Card SUCCESSFULLY";
