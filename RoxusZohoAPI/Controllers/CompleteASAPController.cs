@@ -371,7 +371,7 @@ namespace RoxusZohoAPI.Controllers
             }
         }
 
-        [HttpPost("cases/add-people")]
+        [HttpPost("cases/add-person")]
         public async Task<IActionResult> CasesAddPersonToACase([FromBody] CasesAddPersonToACaseRequest request)
         {
             var apiResultDto = new ApiResultDto<CasesAddPersonToACaseResponse>()
