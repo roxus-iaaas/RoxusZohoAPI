@@ -86,6 +86,12 @@
 
         public const string CCN_400 = "Cases - Create a Note FAILED";
 
+        // CUC: Cases - Create a Note
+
+        public const string CUC_200 = "Cases - Update a Case SUCCESSFULLY";
+
+        public const string CUC_400 = "Cases - Update a Case FAILED";
+
         // PCAPC: People - Create a Person Card
 
         public const string PCAPC_200 = "People - Create a Person Card SUCCESSFULLY";
