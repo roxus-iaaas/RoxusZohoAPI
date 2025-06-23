@@ -15,8 +15,10 @@
         #region Hoowla
 
         public const string HoowlaApiEndpointV2 = "https://app.hoowla.com/api/v2";
-
+    
         public const string HoowlaApiKey = "bac051ef86ba1ba659f541c81712d4e8c6c0043b7cee9ee5";
+
+        public const string HoowlaApiKey2 = "4a2575b23bde4f5d8ad3b59d4b2317dae51602762f05480a";
 
         public const string HoowlaRoxusEmail = "roxusprod@completeasap.co.uk";
 
@@ -92,11 +94,17 @@
 
         public const string CUC_400 = "Cases - Update a Case FAILED";
 
-        // CUC: Cases - Update the Case Worker
+        // CUCW: Cases - Update the Case Worker
 
         public const string CUCW_200 = "Cases - Update the Case Worker SUCCESSFULLY";
 
         public const string CUCW_400 = "Cases - Update the Case Worker FAILED";
+
+        // CUT: Cases - Update a Task
+
+        public const string CUT_200 = "Cases - Update a Task SUCCESSFULLY";
+
+        public const string CUT_400 = "Cases - Update a Task FAILED";
 
         // PCAPC: People - Create a Person Card
 
