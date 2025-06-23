@@ -914,7 +914,7 @@ namespace RoxusZohoAPI.Services.CompleteASAP
                 string requestBody = JsonConvert.SerializeObject(casesCreateANoteRequest);
 
                 var request = new HttpRequestMessage(
-                           HttpMethod.Get,
+                           HttpMethod.Post,
                            endpoint)
                 {
                     Content = new StringContent(requestBody, Encoding.UTF8, "application/json")
