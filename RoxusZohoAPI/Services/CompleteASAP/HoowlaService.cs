@@ -1014,7 +1014,7 @@ namespace RoxusZohoAPI.Services.CompleteASAP
 
             try
             {
-                endpoint = $"{CompleteASAPConstants.HoowlaApiEndpointV2}/cases/cases?id={caseId}" +
+                endpoint = $"{CompleteASAPConstants.HoowlaApiEndpointV2}/cases/cases?id={caseId}&" +
                     $"key={CompleteASAPConstants.HoowlaApiKey}&user={CompleteASAPConstants.HoowlaRoxusEmail}";
 
                 string requestBody = JsonConvert.SerializeObject(casesUpdateACaseRequest);
