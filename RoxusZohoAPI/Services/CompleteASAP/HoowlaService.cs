@@ -1111,6 +1111,111 @@ namespace RoxusZohoAPI.Services.CompleteASAP
 
         }
 
+        public async Task<ApiResultDto<CasesUpdateTheCaseWorkerResponse>> CasesUpdateTheCaseWorker(string caseId, CasesUpdateTheCaseWorkerRequest casesUpdateTheCaseWorkerRequest)
+        {
+            ApiLogging apiLogging = null;
+            string endpoint = string.Empty;
+            var apiResult = new ApiResultDto<CasesUpdateTheCaseWorkerResponse>();
+
+            try
+            {
+                endpoint = $"{CompleteASAPConstants.HoowlaApiEndpointV2}/cases/cases/case-worker?id={caseId}&" +
+                    $"key={CompleteASAPConstants.HoowlaApiKey}&user={CompleteASAPConstants.HoowlaRoxusEmail}";
+
+                string requestBody = JsonConvert.SerializeObject(casesUpdateTheCaseWorkerRequest);
+
+                var request = new HttpRequestMessage(
+                           HttpMethod.Put,
+                           endpoint)
+                {
+                    Content = new StringContent(requestBody, Encoding.UTF8, "application/json")
+                };
+
+                using var httpClient = new HttpClient();
+                using var response = await httpClient.SendAsync(request,
+                           HttpCompletionOption.ResponseHeadersRead);
+                // response.EnsureSuccessStatusCode();
+                var stream = await response.Content.ReadAsStreamAsync();
+                // Convert stream to string
+                var reader = new StreamReader(stream);
+                string responseData = reader.ReadToEnd();
+                if (response.StatusCode == HttpStatusCode.OK ||
+                    response.StatusCode == HttpStatusCode.Created)
+                {
+                    var responseObj = JsonConvert.DeserializeObject
+                        <CasesUpdateTheCaseWorkerResponse>(responseData);
+                    apiResult.Code = ResultCode.OK;
+                    apiResult.Message = ZohoConstants.MSG_200;
+                    apiResult.Data = responseObj;
+                }
+
+                if (response.StatusCode == HttpStatusCode.NoContent)
+                {
+                    apiResult.Code = ResultCode.NoContent;
+                    apiResult.Message = ZohoConstants.MSG_204;
+                }
+
+                if (response.StatusCode == HttpStatusCode.Unauthorized)
+                {
+                    apiResult.Code = ResultCode.Unauthorize;
+                    apiResult.Message = ZohoConstants.MSG_401;
+                }
+
+                // HANDLE LOGGING TO DATABASE
+                apiLogging = new ApiLogging()
+                {
+                    Id = Guid.NewGuid().ToString(),
+                    Response = responseData,
+                    ApplicationName = "Hoowla",
+                    CustomerName = "CompleteASAP",
+                    Status = (int)response.StatusCode + " " + response.StatusCode,
+                    CreatedDate = DateTimeHelpers.ConvertDateTimeToString(DateTime.UtcNow),
+                    HttpMethod = "PUT",
+                    ApiName = "Cases - Update the Case Worker",
+                    Endpoint = endpoint
+                };
+                return apiResult;
+            }
+            catch (WebException ex)
+            {
+                HttpWebResponse badResponse = (HttpWebResponse)ex.Response;
+                using (Stream responseStream = badResponse.GetResponseStream())
+                {
+                    if (responseStream != null)
+                    {
+                        using var reader = new StreamReader(responseStream);
+                        string responseData = reader.ReadToEnd();
+                        apiLogging = new ApiLogging()
+                        {
+                            Id = Guid.NewGuid().ToString(),
+                            Response = responseData,
+                            ApplicationName = "Hoowla",
+                            CustomerName = "CompleteASAP",
+                            Status = (int)badResponse.StatusCode + " " + badResponse.StatusCode,
+                            CreatedDate = DateTimeHelpers.ConvertDateTimeToString(DateTime.UtcNow),
+                            HttpMethod = "PUT",
+                            ApiName = "Cases - Update the Case Worker",
+                            Endpoint = endpoint
+                        };
+                    }
+                }
+                return null;
+            }
+            catch (Exception ex)
+            {
+                return null;
+            }
+            finally
+            {
+                if (apiLogging != null)
+                {
+                    await _loggingRepository.CreateApiLogging(apiLogging);
+                }
+
+            }
+
+        }
+
         public async Task<ApiResultDto<GetPersonByIdResponse>> GetPersonById(string personId)
         {
 
