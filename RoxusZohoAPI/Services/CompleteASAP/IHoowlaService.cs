@@ -1,5 +1,6 @@
 ﻿using RoxusZohoAPI.Models.Common;
 using RoxusZohoAPI.Models.CompleteASAP.Hoowla;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace RoxusZohoAPI.Services.CompleteASAP
@@ -45,6 +46,9 @@ namespace RoxusZohoAPI.Services.CompleteASAP
 
         Task<ApiResultDto<CasesUpdateATaskResponse>> CasesUpdateATask
             (CasesUpdateATaskRequest casesUpdateATaskRequest);
+
+        Task<ApiResultDto<List<CasesListDocumentEntitiesResponse>>> CasesListDocumentEntities
+            (string caseId);
 
         Task<ApiResultDto<GetPersonByIdResponse>> GetPersonById(string personId);
 

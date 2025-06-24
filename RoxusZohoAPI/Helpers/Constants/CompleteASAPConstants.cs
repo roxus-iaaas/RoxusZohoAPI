@@ -106,6 +106,12 @@
 
         public const string CUT_400 = "Cases - Update a Task FAILED";
 
+        // CLDE: Cases - List Document Entities
+
+        public const string CLDE_200 = "Cases - List Document Entities SUCCESSFULLY";
+
+        public const string CLDE_400 = "Cases - List Document Entities FAILED";
+
         // PCAPC: People - Create a Person Card
 
         public const string PCAPC_200 = "People - Create a Person Card SUCCESSFULLY";

@@ -6,6 +6,7 @@ using RoxusZohoAPI.Services.PureFinance;
 using System.Threading.Tasks;
 using System;
 using RoxusZohoAPI.Models.CompleteASAP.Hoowla;
+using System.Collections.Generic;
 
 namespace RoxusZohoAPI.Controllers
 {
@@ -490,6 +491,32 @@ namespace RoxusZohoAPI.Controllers
             try
             {
                 apiResultDto = await _hoowlaService.CasesUpdateATask(request);
+                if (apiResultDto.Code == ResultCode.OK)
+                {
+                    return Ok(apiResultDto);
+                }
+
+                return BadRequest(apiResultDto);
+            }
+            catch (Exception)
+            {
+                return BadRequest(apiResultDto);
+            }
+        }
+
+        [HttpGet("cases/{caseId}/entities")]
+        public async Task<IActionResult> CasesListDocumentEntities(string caseId)
+        {
+            var apiResultDto = new ApiResultDto<List<CasesListDocumentEntitiesResponse>>()
+            {
+                Code = ResultCode.BadRequest,
+                Message = CompleteASAPConstants.CLDE_400,
+                Data = null
+            };
+
+            try
+            {
+                apiResultDto = await _hoowlaService.CasesListDocumentEntities(caseId);
                 if (apiResultDto.Code == ResultCode.OK)
                 {
                     return Ok(apiResultDto);
