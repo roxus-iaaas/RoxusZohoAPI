@@ -112,6 +112,12 @@
 
         public const string CLDE_400 = "Cases - List Document Entities FAILED";
 
+        // CCT: Cases - Complete a Task
+
+        public const string CCT_200 = "Cases - Complete a Task SUCCESSFULLY";
+
+        public const string CCT_400 = "Cases - Complete a Task FAILED";
+
         // PCAPC: People - Create a Person Card
 
         public const string PCAPC_200 = "People - Create a Person Card SUCCESSFULLY";

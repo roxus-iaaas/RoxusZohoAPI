@@ -529,6 +529,32 @@ namespace RoxusZohoAPI.Controllers
                 return BadRequest(apiResultDto);
             }
         }
+
+        [HttpPut("cases/tasks/{taskId}/complete-task")]
+        public async Task<IActionResult> CasesCompleteATask(string taskId)
+        {
+            var apiResultDto = new ApiResultDto<CasesCompleteATaskResponse>()
+            {
+                Code = ResultCode.BadRequest,
+                Message = CompleteASAPConstants.CCT_400,
+                Data = null
+            };
+
+            try
+            {
+                apiResultDto = await _hoowlaService.CasesCompleteATask(taskId);
+                if (apiResultDto.Code == ResultCode.OK)
+                {
+                    return Ok(apiResultDto);
+                }
+
+                return BadRequest(apiResultDto);
+            }
+            catch (Exception)
+            {
+                return BadRequest(apiResultDto);
+            }
+        }
         #endregion
 
         [HttpPost("person/byemail")]
