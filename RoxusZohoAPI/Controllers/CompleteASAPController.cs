@@ -555,6 +555,32 @@ namespace RoxusZohoAPI.Controllers
                 return BadRequest(apiResultDto);
             }
         }
+
+        [HttpPut("cases/{caseId}/update-fee-earner")]
+        public async Task<IActionResult> CasesUpdateTheFeeEarner(string caseId, [FromBody] CasesUpdateTheFeeEarnerRequest casesUpdateTheFeeEarnerRequest)
+        {
+            var apiResultDto = new ApiResultDto<CasesUpdateTheFeeEarnerResponse>()
+            {
+                Code = ResultCode.BadRequest,
+                Message = CompleteASAPConstants.CUTFE_400,
+                Data = null
+            };
+
+            try
+            {
+                apiResultDto = await _hoowlaService.CasesUpdateTheFeeEarner(caseId, casesUpdateTheFeeEarnerRequest);
+                if (apiResultDto.Code == ResultCode.OK)
+                {
+                    return Ok(apiResultDto);
+                }
+
+                return BadRequest(apiResultDto);
+            }
+            catch (Exception)
+            {
+                return BadRequest(apiResultDto);
+            }
+        }
         #endregion
 
         [HttpPost("person/byemail")]

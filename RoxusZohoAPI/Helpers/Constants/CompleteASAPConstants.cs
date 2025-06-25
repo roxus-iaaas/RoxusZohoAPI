@@ -118,6 +118,12 @@
 
         public const string CCT_400 = "Cases - Complete a Task FAILED";
 
+        // CUTFE: Cases - Update the Fee Earner
+
+        public const string CUTFE_200 = "Cases - Update the Fee Earner SUCCESSFULLY";
+
+        public const string CUTFE_400 = "Cases - Update the Fee Earner FAILED";
+
         // PCAPC: People - Create a Person Card
 
         public const string PCAPC_200 = "People - Create a Person Card SUCCESSFULLY";
