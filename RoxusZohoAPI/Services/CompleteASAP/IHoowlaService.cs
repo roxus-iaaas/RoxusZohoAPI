@@ -58,6 +58,8 @@ namespace RoxusZohoAPI.Services.CompleteASAP
 
         Task<ApiResultDto<List<QuoteGetCompanyCustomQuoteSituationsResponse>>> QuoteGetCompanyCustomQuoteSituations();
 
+        Task<ApiResultDto<QuoteCalcCreateAQuoteForAPanelResponse>> QuoteCalcCreateAQuoteForAPanel(QuoteCalcCreateAQuoteForAPanelRequest quoteCalcCreateAQuoteForAPanelRequest);
+
         Task<ApiResultDto<GetPersonByIdResponse>> GetPersonById(string personId);
 
         Task<ApiResultDto<GetPersonByEmailResponse>> GetPersonByEmail

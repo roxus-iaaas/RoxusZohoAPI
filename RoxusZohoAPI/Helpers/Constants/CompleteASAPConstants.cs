@@ -136,6 +136,12 @@
 
         public const string QGCCQS_400 = "Quote - Get Company Custom Quote Situations FAILED";
 
+        // QCCQFP: QuoteCalc - Create a Quote for a Panel
+
+        public const string QCCQFP_200 = "QuoteCalc - Create a Quote for a Panel SUCCESSFULLY";
+
+        public const string QCCQFP_400 = "QuoteCalc - Create a Quote for a Panel FAILED";
+
         // PCAPC: People - Create a Person Card
 
         public const string PCAPC_200 = "People - Create a Person Card SUCCESSFULLY";

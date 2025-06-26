@@ -636,7 +636,39 @@ namespace RoxusZohoAPI.Controllers
                 return BadRequest(apiResultDto);
             }
         }
+
         #endregion
+
+        #region Quote Calc
+
+        [HttpPost("quote-calc/panel")]
+        public async Task<IActionResult> QuoteCalcCreateAQuoteForAPanel([FromBody] QuoteCalcCreateAQuoteForAPanelRequest quoteCalcCreateAQuoteForAPanelRequest)
+        {
+            var apiResultDto = new ApiResultDto<QuoteCalcCreateAQuoteForAPanelResponse>()
+            {
+                Code = ResultCode.BadRequest,
+                Message = CompleteASAPConstants.QCCQFP_400,
+                Data = null
+            };
+
+            try
+            {
+                apiResultDto = await _hoowlaService.QuoteCalcCreateAQuoteForAPanel(quoteCalcCreateAQuoteForAPanelRequest);
+                if (apiResultDto.Code == ResultCode.OK)
+                {
+                    return Ok(apiResultDto);
+                }
+
+                return BadRequest(apiResultDto);
+            }
+            catch (Exception)
+            {
+                return BadRequest(apiResultDto);
+            }
+        }
+
+        #endregion
+
 
         [HttpPost("person/byemail")]
         public async Task<IActionResult> GetPersonByEmail
