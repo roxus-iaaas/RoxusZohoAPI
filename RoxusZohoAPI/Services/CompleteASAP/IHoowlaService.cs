@@ -54,6 +54,8 @@ namespace RoxusZohoAPI.Services.CompleteASAP
 
         Task<ApiResultDto<CasesUpdateTheFeeEarnerResponse>> CasesUpdateTheFeeEarner(string caseId, CasesUpdateTheFeeEarnerRequest casesUpdateTheFeeEarnerRequest);
 
+        Task<ApiResultDto<List<CasesGetBillableInfoByCaseResponse>>> CasesGetBillableInfoByCase (string caseId);
+
         Task<ApiResultDto<GetPersonByIdResponse>> GetPersonById(string personId);
 
         Task<ApiResultDto<GetPersonByEmailResponse>> GetPersonByEmail

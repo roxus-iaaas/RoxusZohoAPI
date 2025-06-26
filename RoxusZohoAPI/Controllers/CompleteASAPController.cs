@@ -581,6 +581,32 @@ namespace RoxusZohoAPI.Controllers
                 return BadRequest(apiResultDto);
             }
         }
+
+        [HttpGet("cases/{caseId}/list-billable-info")]
+        public async Task<IActionResult> CasesGetBillableInfoByCase(string caseId)
+        {
+            var apiResultDto = new ApiResultDto<List<CasesGetBillableInfoByCaseResponse>>()
+            {
+                Code = ResultCode.BadRequest,
+                Message = CompleteASAPConstants.CGBIBC_400,
+                Data = null
+            };
+
+            try
+            {
+                apiResultDto = await _hoowlaService.CasesGetBillableInfoByCase(caseId);
+                if (apiResultDto.Code == ResultCode.OK)
+                {
+                    return Ok(apiResultDto);
+                }
+
+                return BadRequest(apiResultDto);
+            }
+            catch (Exception)
+            {
+                return BadRequest(apiResultDto);
+            }
+        }
         #endregion
 
         [HttpPost("person/byemail")]

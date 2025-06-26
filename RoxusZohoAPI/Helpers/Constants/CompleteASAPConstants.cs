@@ -124,6 +124,12 @@
 
         public const string CUTFE_400 = "Cases - Update the Fee Earner FAILED";
 
+        // CUTFE: Cases - Gets billable information by case number
+
+        public const string CGBIBC_200 = "Cases - Gets billable information by case number SUCCESSFULLY";
+
+        public const string CGBIBC_400 = "Cases - Gets billable information by case number FAILED";
+
         // PCAPC: People - Create a Person Card
 
         public const string PCAPC_200 = "People - Create a Person Card SUCCESSFULLY";
