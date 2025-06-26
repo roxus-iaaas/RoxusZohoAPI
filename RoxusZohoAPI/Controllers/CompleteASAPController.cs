@@ -609,6 +609,35 @@ namespace RoxusZohoAPI.Controllers
         }
         #endregion
 
+        #region Quote
+
+        [HttpGet("quote/situation")]
+        public async Task<IActionResult> QuoteGetCompanyCustomQuoteSituations ()
+        {
+            var apiResultDto = new ApiResultDto<List<QuoteGetCompanyCustomQuoteSituationsResponse>>()
+            {
+                Code = ResultCode.BadRequest,
+                Message = CompleteASAPConstants.CGBIBC_400,
+                Data = null
+            };
+
+            try
+            {
+                apiResultDto = await _hoowlaService.QuoteGetCompanyCustomQuoteSituations();
+                if (apiResultDto.Code == ResultCode.OK)
+                {
+                    return Ok(apiResultDto);
+                }
+
+                return BadRequest(apiResultDto);
+            }
+            catch (Exception)
+            {
+                return BadRequest(apiResultDto);
+            }
+        }
+        #endregion
+
         [HttpPost("person/byemail")]
         public async Task<IActionResult> GetPersonByEmail
             ([FromBody] GetPersonByEmailRequest getPersonByEmailRequest)

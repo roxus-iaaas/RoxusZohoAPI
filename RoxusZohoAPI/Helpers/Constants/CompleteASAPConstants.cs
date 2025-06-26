@@ -124,11 +124,17 @@
 
         public const string CUTFE_400 = "Cases - Update the Fee Earner FAILED";
 
-        // CUTFE: Cases - Gets billable information by case number
+        // CGBIBC: Cases - Gets billable information by case number
 
         public const string CGBIBC_200 = "Cases - Gets billable information by case number SUCCESSFULLY";
 
         public const string CGBIBC_400 = "Cases - Gets billable information by case number FAILED";
+
+        // QGCCQS: Quote - Get Company Custom Quote Situations
+
+        public const string QGCCQS_200 = "Quote - Get Company Custom Quote Situations SUCCESSFULLY";
+
+        public const string QGCCQS_400 = "Quote - Get Company Custom Quote Situations FAILED";
 
         // PCAPC: People - Create a Person Card
 
