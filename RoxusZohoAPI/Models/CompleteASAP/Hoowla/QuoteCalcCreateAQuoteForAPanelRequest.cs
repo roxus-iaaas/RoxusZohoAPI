@@ -64,6 +64,6 @@ namespace RoxusZohoAPI.Models.CompleteASAP.Hoowla
         public string form_client_address_county { get; set; }
         public string form_client_address_postcode { get; set; }
         public string form_attached_note { get; set; }
-        public string person_send { get; set; }
+        public int? person_send { get; set; }
     }
 }
