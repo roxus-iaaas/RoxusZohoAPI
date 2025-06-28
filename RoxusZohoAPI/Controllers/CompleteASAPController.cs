@@ -669,6 +669,36 @@ namespace RoxusZohoAPI.Controllers
 
         #endregion
 
+        #region Users
+
+        [HttpGet("users/list-users-employees")]
+        public async Task<IActionResult> UsersListUsersEmployees ()
+        {
+            var apiResultDto = new ApiResultDto<List<UsersListUsersEmployeesResponse>>()
+            {
+                Code = ResultCode.BadRequest,
+                Message = CompleteASAPConstants.QCCQFP_400,
+                Data = null
+            };
+
+            try
+            {
+                apiResultDto = await _hoowlaService.UsersListUsersEmployees();
+                if (apiResultDto.Code == ResultCode.OK)
+                {
+                    return Ok(apiResultDto);
+                }
+
+                return BadRequest(apiResultDto);
+            }
+            catch (Exception)
+            {
+                return BadRequest(apiResultDto);
+            }
+        }
+
+        #endregion
+
 
         [HttpPost("person/byemail")]
         public async Task<IActionResult> GetPersonByEmail

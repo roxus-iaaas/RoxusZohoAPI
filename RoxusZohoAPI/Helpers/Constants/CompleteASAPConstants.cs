@@ -142,6 +142,12 @@
 
         public const string QCCQFP_400 = "QuoteCalc - Create a Quote for a Panel FAILED";
 
+        // ULUE: Users - List Users/Employees
+
+        public const string ULUE_200 = "Users - List Users/Employees SUCCESSFULLY";
+
+        public const string ULUE_400 = "Users - List Users/Employees FAILED";
+
         // PCAPC: People - Create a Person Card
 
         public const string PCAPC_200 = "People - Create a Person Card SUCCESSFULLY";
