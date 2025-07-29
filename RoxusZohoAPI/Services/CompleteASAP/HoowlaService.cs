@@ -701,6 +701,8 @@ namespace RoxusZohoAPI.Services.CompleteASAP
 
             try
             {
+                if (casesCreateANewCaseRequest.case_type_id == 3) 
+                    casesCreateANewCaseRequest.case_name = null;
 
                 endpoint = $"{CompleteASAPConstants.HoowlaApiEndpointV2}/cases/cases?" +
                     $"key={CompleteASAPConstants.HoowlaApiKey}&user={CompleteASAPConstants.HoowlaRoxusEmail}";
