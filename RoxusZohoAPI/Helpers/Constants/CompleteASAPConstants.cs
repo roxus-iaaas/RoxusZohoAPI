@@ -112,6 +112,12 @@
 
         public const string CLDE_400 = "Cases - List Document Entities FAILED";
 
+        // CLDE: Cases - Update a Document Entity
+
+        public const string CUDE_200 = "Cases - Update a Document Entity SUCCESSFULLY";
+
+        public const string CUDE_400 = "Cases - Update a Document Entity FAILED";
+
         // CCT: Cases - Complete a Task
 
         public const string CCT_200 = "Cases - Complete a Task SUCCESSFULLY";

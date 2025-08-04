@@ -50,6 +50,8 @@ namespace RoxusZohoAPI.Services.CompleteASAP
         Task<ApiResultDto<List<CasesListDocumentEntitiesResponse>>> CasesListDocumentEntities
             (string caseId);
 
+        Task<ApiResultDto<CasesUpdateADocumentEntityResponse>> CasesUpdateADocumentEntity (CasesUpdateADocumentEntityRequest casesUpdateADocumentEntityRequest);
+
         Task<ApiResultDto<CasesCompleteATaskResponse>> CasesCompleteATask (string taskId);
 
         Task<ApiResultDto<CasesUpdateTheFeeEarnerResponse>> CasesUpdateTheFeeEarner(string caseId, CasesUpdateTheFeeEarnerRequest casesUpdateTheFeeEarnerRequest);

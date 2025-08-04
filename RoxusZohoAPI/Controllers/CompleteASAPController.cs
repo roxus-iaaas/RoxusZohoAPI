@@ -530,6 +530,32 @@ namespace RoxusZohoAPI.Controllers
             }
         }
 
+        [HttpPut("cases/update-entity")]
+        public async Task<IActionResult> CasesUpdateADocumentEntity([FromBody] CasesUpdateADocumentEntityRequest request)
+        {
+            var apiResultDto = new ApiResultDto<CasesUpdateADocumentEntityResponse>()
+            {
+                Code = ResultCode.BadRequest,
+                Message = CompleteASAPConstants.CUDE_400,
+                Data = null
+            };
+
+            try
+            {
+                apiResultDto = await _hoowlaService.CasesUpdateADocumentEntity(request);
+                if (apiResultDto.Code == ResultCode.OK)
+                {
+                    return Ok(apiResultDto);
+                }
+
+                return BadRequest(apiResultDto);
+            }
+            catch (Exception)
+            {
+                return BadRequest(apiResultDto);
+            }
+        }
+
         [HttpPut("cases/tasks/{taskId}/complete-task")]
         public async Task<IActionResult> CasesCompleteATask(string taskId)
         {
