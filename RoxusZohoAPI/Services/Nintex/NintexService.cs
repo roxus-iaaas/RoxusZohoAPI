@@ -28,7 +28,7 @@ namespace RoxusZohoAPI.Services.Nintex
             {
 
                 var endpoint = "https://roxusrpaapi.azurewebsites.net/api/tasks244";
-                string apiKey = "Um94dXMuQ29uc29sZTpSb3h1c0AyMDI1IQ==";
+                string apiKey = "032F6944-CA5F-4EB8-8046-21490D2C88ED";
 
                 string requestBody = JsonConvert.SerializeObject(addTaskRequest);
 
@@ -44,7 +44,7 @@ namespace RoxusZohoAPI.Services.Nintex
 
                 using var response = await httpClient.SendAsync(request,
                            HttpCompletionOption.ResponseHeadersRead);
-                response.EnsureSuccessStatusCode();
+                //response.EnsureSuccessStatusCode();
                 var stream = await response.Content.ReadAsStreamAsync();
 
                 // Convert stream to string
@@ -53,8 +53,13 @@ namespace RoxusZohoAPI.Services.Nintex
 
                 if (response.StatusCode == HttpStatusCode.OK)
                 {
+                    apiResult.Code = ResultCode.OK;
                     apiResult = JsonConvert.DeserializeObject<ApiResultDto<AddTask244Response>>(responseData);
                 }
+                else
+                {
+                    apiResult.Message = responseData;
+                }    
 
                 return apiResult;
 

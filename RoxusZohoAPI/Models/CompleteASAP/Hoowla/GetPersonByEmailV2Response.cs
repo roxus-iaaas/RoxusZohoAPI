@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using Newtonsoft.Json;
+using System.Collections.Generic;
 using System.Text.Json;
 
 namespace RoxusZohoAPI.Models.CompleteASAP.Hoowla
@@ -41,7 +42,9 @@ namespace RoxusZohoAPI.Models.CompleteASAP.Hoowla
         public Phone_Numbers[] phone_numbers { get; set; }
         public RelationshipV2[] relationships { get; set; }
         public Custom[] custom { get; set; }
-        public object[] case_history { get; set; }
+
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+        public List<Case_History> case_history { get; set; }
         public int? case_number { get; set; }
     }
 

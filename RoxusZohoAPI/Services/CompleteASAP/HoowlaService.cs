@@ -2350,7 +2350,11 @@ namespace RoxusZohoAPI.Services.CompleteASAP
 
                     foreach (var obj in responseObj)
                     {
-                        obj.case_number = obj.case_history.Length > 0 ? obj.case_history.Length : 0;
+
+                        if (obj.case_history != null)
+                        {
+                            obj.case_number = obj.case_history.Count > 0 ? obj.case_history.Count : 0;
+                        }    
                         obj.case_history = null; // Clear case history to avoid sending unnecessary data
                     }
                     responseObj = responseObj.OrderByDescending(x => x.case_number).ToList();
