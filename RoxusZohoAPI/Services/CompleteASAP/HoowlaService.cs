@@ -16,6 +16,7 @@ using System.Collections.Generic;
 using RoxusZohoAPI.Models.PureFinance.Pipedrive;
 using System.Text;
 using RoxusZohoAPI.Models.Zoho.ZohoCRM;
+using System.Linq;
 
 namespace RoxusZohoAPI.Services.CompleteASAP
 {
@@ -2196,6 +2197,109 @@ namespace RoxusZohoAPI.Services.CompleteASAP
                             CreatedDate = DateTimeHelpers.ConvertDateTimeToString(DateTime.UtcNow),
                             HttpMethod = "GET",
                             ApiName = "People - Get Person Card(s) by Email",
+                            Endpoint = endpoint
+                        };
+                    }
+                }
+                return null;
+            }
+            catch (Exception ex)
+            {
+                return null;
+            }
+            finally
+            {
+                if (apiLogging != null)
+                {
+                    await _loggingRepository.CreateApiLogging(apiLogging);
+                }
+
+            }
+
+        }
+
+        public async Task<ApiResultDto<GetPersonByEmailV2Response>> GetPersonByEmailV2(GetPersonByEmailV2Request getPersonByEmailV2Request)
+        {
+
+            ApiLogging apiLogging = null;
+            string endpoint = string.Empty;
+            var apiResult = new ApiResultDto<GetPersonByEmailV2Response>();
+            try
+            {
+
+                string email = getPersonByEmailV2Request.Email;
+
+                endpoint = $"{CompleteASAPConstants.HoowlaApiEndpointV2}/people/person/byemail?email={email}" +
+                    $"&key={CompleteASAPConstants.HoowlaApiKey}&user={CompleteASAPConstants.HoowlaRoxusEmail}";
+                var request = new HttpRequestMessage(
+                           HttpMethod.Get,
+                           endpoint);
+                using var httpClient = new HttpClient();
+                using var response = await httpClient.SendAsync(request,
+                           HttpCompletionOption.ResponseHeadersRead);
+                response.EnsureSuccessStatusCode();
+                var stream = await response.Content.ReadAsStreamAsync();
+                // Convert stream to string
+                var reader = new StreamReader(stream);
+                string responseData = reader.ReadToEnd();
+                if (response.StatusCode == HttpStatusCode.OK)
+                {
+                    var responseObj = JsonConvert.DeserializeObject<List<EmailPersonDetailsV2>>(responseData);
+
+                    foreach (var obj in responseObj)
+                    {
+                        obj.case_number = obj.case_history.Length > 0 ? obj.case_history.Length : 0;
+                        obj.case_history = null; // Clear case history to avoid sending unnecessary data
+                    }
+                    responseObj = responseObj.OrderByDescending(x => x.case_number).ToList();
+
+                    var getPersonsByEmailV2Response = new GetPersonByEmailV2Response();
+                    getPersonsByEmailV2Response.EmailPersons = responseObj;
+
+                    apiResult.Code = ResultCode.OK;
+                    apiResult.Message = ZohoConstants.MSG_200;
+                    apiResult.Data = getPersonsByEmailV2Response;
+                }
+
+                if (response.StatusCode == HttpStatusCode.NoContent)
+                {
+                    apiResult.Code = ResultCode.NoContent;
+                    apiResult.Message = ZohoConstants.MSG_204;
+                }
+                // HANDLE LOGGING TO DATABASE
+                apiLogging = new ApiLogging()
+                {
+                    Id = Guid.NewGuid().ToString(),
+                    Response = responseData,
+                    ApplicationName = "Hoowla",
+                    CustomerName = "CompleteASAP",
+                    Status = (int)response.StatusCode + " " + response.StatusCode,
+                    CreatedDate = DateTimeHelpers.ConvertDateTimeToString(DateTime.UtcNow),
+                    HttpMethod = "GET",
+                    ApiName = "People - Get Person Card(s) by Email v2",
+                    Endpoint = endpoint
+                };
+                return apiResult;
+            }
+            catch (WebException ex)
+            {
+                HttpWebResponse badResponse = (HttpWebResponse)ex.Response;
+                using (Stream responseStream = badResponse.GetResponseStream())
+                {
+                    if (responseStream != null)
+                    {
+                        using var reader = new StreamReader(responseStream);
+                        string responseData = reader.ReadToEnd();
+                        apiLogging = new ApiLogging()
+                        {
+                            Id = Guid.NewGuid().ToString(),
+                            Response = responseData,
+                            ApplicationName = "Hoowla",
+                            CustomerName = "CompleteASAP",
+                            Status = (int)badResponse.StatusCode + " " + badResponse.StatusCode,
+                            CreatedDate = DateTimeHelpers.ConvertDateTimeToString(DateTime.UtcNow),
+                            HttpMethod = "GET",
+                            ApiName = "People - Get Person Card(s) by Email v2",
                             Endpoint = endpoint
                         };
                     }

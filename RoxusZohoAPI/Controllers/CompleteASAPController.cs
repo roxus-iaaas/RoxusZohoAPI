@@ -732,6 +732,35 @@ namespace RoxusZohoAPI.Controllers
             }
         }
 
+        [HttpPost("person/byemail-v2")]
+        public async Task<IActionResult> GetPersonByEmailV2 ([FromBody] GetPersonByEmailV2Request getPersonByEmailV2Request)
+        {
+            var apiResultDto = new ApiResultDto<GetPersonByEmailV2Response>()
+            {
+                Code = ResultCode.BadRequest,
+                Message = PureFinanceConstants.Airtable_GetToken_400,
+                Data = null
+            };
+
+            try
+            {
+                apiResultDto = await _hoowlaService.GetPersonByEmailV2(getPersonByEmailV2Request);
+
+                if (apiResultDto.Code == ResultCode.OK)
+                {
+                    return Ok(apiResultDto);
+                }
+
+                return BadRequest(apiResultDto);
+            }
+            catch (Exception)
+            {
+
+                return BadRequest(apiResultDto);
+
+            }
+        }
+
     }
 
 }

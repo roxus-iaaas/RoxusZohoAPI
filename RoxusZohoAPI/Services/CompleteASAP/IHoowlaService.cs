@@ -67,6 +67,8 @@ namespace RoxusZohoAPI.Services.CompleteASAP
         Task<ApiResultDto<GetPersonByEmailResponse>> GetPersonByEmail
             (GetPersonByEmailRequest getPersonByEmailRequest);
 
+        Task<ApiResultDto<GetPersonByEmailV2Response>> GetPersonByEmailV2 (GetPersonByEmailV2Request getPersonByEmailV2Request);
+
         Task<ApiResultDto<PeopleCreateAPersonCardResponse>> PeopleCreateAPersonCard
             (PeopleCreateAPersonCardRequest createPersonCardRequest);
 
