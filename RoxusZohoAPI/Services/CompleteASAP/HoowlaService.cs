@@ -2725,6 +2725,11 @@ namespace RoxusZohoAPI.Services.CompleteASAP
 
             }
         }
+
+        public async Task<ApiResultDto<DocumentsCreateNewDocumentResponse>> DocumentsCreateNewDocument(DocumentsCreateNewDocumentRequest requestObj)
+        {
+            throw new NotImplementedException();
+        }
     }
 
 }

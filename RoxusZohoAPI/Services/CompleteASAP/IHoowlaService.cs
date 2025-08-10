@@ -79,6 +79,7 @@ namespace RoxusZohoAPI.Services.CompleteASAP
 
         Task<ApiResultDto<List<LandRegPerformEnquiryByPropertyDescResponse>>> LandRegPerformEnquiryByPropertyDesc (LandRegPerformEnquiryByPropertyDescRequest requestObj);
 
+        Task<ApiResultDto<DocumentsCreateNewDocumentResponse>> DocumentsCreateNewDocument(DocumentsCreateNewDocumentRequest requestObj);
     }
 
 }
