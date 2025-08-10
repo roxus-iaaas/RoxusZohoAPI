@@ -790,7 +790,7 @@ namespace RoxusZohoAPI.Controllers
         [HttpPost("land-registry/property-desc")]
         public async Task<IActionResult> LandRegPerformEnquiryByPropertyDesc ([FromBody] LandRegPerformEnquiryByPropertyDescRequest requestObj)
         {
-            var apiResultDto = new ApiResultDto<LandRegPerformEnquiryByPropertyDescResponse>()
+            var apiResultDto = new ApiResultDto<List<LandRegPerformEnquiryByPropertyDescResponse>>()
             {
                 Code = ResultCode.BadRequest,
                 Message = CompleteASAPConstants.LRPEBPD_400,

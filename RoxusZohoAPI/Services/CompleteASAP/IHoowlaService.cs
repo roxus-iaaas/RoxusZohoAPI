@@ -77,7 +77,7 @@ namespace RoxusZohoAPI.Services.CompleteASAP
         Task<ApiResultDto<PeopleAddRelationshipToPersonResponse>> PeopleAddRelationshipToPerson
             (PeopleAddRelationshipToPersonRequest addRelationshipRequest);
 
-        Task<ApiResultDto<LandRegPerformEnquiryByPropertyDescResponse>> LandRegPerformEnquiryByPropertyDesc (LandRegPerformEnquiryByPropertyDescRequest requestObj);
+        Task<ApiResultDto<List<LandRegPerformEnquiryByPropertyDescResponse>>> LandRegPerformEnquiryByPropertyDesc (LandRegPerformEnquiryByPropertyDescRequest requestObj);
 
     }
 

@@ -21,12 +21,4 @@ namespace RoxusZohoAPI.Models.CompleteASAP.Hoowla
         [JsonProperty("postcode")]
         public string Postcode { get; set; }
     }
-
-    public class LandRegPerformEnquiryByPropertyDescErrorResponse
-    {
-        [JsonProperty("error")]
-        public string Error { get; set; }
-        [JsonProperty("message")]
-        public string Message { get; set; }
-    }
 }

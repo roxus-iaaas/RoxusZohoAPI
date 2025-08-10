@@ -2625,11 +2625,11 @@ namespace RoxusZohoAPI.Services.CompleteASAP
             }
         }
 
-        public async Task<ApiResultDto<LandRegPerformEnquiryByPropertyDescResponse>> LandRegPerformEnquiryByPropertyDesc(LandRegPerformEnquiryByPropertyDescRequest requestObj)
+        public async Task<ApiResultDto<List<LandRegPerformEnquiryByPropertyDescResponse>>> LandRegPerformEnquiryByPropertyDesc(LandRegPerformEnquiryByPropertyDescRequest requestObj)
         {
             ApiLogging apiLogging = null;
             string endpoint = string.Empty;
-            var apiResult = new ApiResultDto<LandRegPerformEnquiryByPropertyDescResponse>();
+            var apiResult = new ApiResultDto<List<LandRegPerformEnquiryByPropertyDescResponse>>();
 
             try
             {
@@ -2654,7 +2654,7 @@ namespace RoxusZohoAPI.Services.CompleteASAP
                 string responseData = reader.ReadToEnd();
                 if (response.StatusCode == HttpStatusCode.OK)
                 {
-                    var responseObj = JsonConvert.DeserializeObject<LandRegPerformEnquiryByPropertyDescResponse>(responseData);
+                    var responseObj = JsonConvert.DeserializeObject<List<LandRegPerformEnquiryByPropertyDescResponse>>(responseData);
                     apiResult.Code = ResultCode.OK;
                     apiResult.Message = ZohoConstants.MSG_200;
                     apiResult.Data = responseObj;
