@@ -166,6 +166,12 @@
 
         public const string PARP_400 = "People - Add Relationship to Person FAILED";
 
+        // LRPEBPD: Land Registry - Perform an Enquiry by Property Description
+
+        public const string LRPEBPD_200 = "Land Registry - Perform an Enquiry by Property Description SUCCESSFULLY";
+
+        public const string LRPEBPD_400 = "Land Registry - Perform an Enquiry by Property Description FAILED";
+
         #endregion
 
     }

@@ -787,6 +787,35 @@ namespace RoxusZohoAPI.Controllers
             }
         }
 
+        [HttpPost("land-registry/property-desc")]
+        public async Task<IActionResult> LandRegPerformEnquiryByPropertyDesc ([FromBody] LandRegPerformEnquiryByPropertyDescRequest requestObj)
+        {
+            var apiResultDto = new ApiResultDto<LandRegPerformEnquiryByPropertyDescResponse>()
+            {
+                Code = ResultCode.BadRequest,
+                Message = CompleteASAPConstants.LRPEBPD_400,
+                Data = null
+            };
+
+            try
+            {
+                apiResultDto = await _hoowlaService.LandRegPerformEnquiryByPropertyDesc(requestObj);
+
+                if (apiResultDto.Code == ResultCode.OK)
+                {
+                    return Ok(apiResultDto);
+                }
+
+                return BadRequest(apiResultDto);
+            }
+            catch (Exception)
+            {
+
+                return BadRequest(apiResultDto);
+
+            }
+        }
+
     }
 
 }
