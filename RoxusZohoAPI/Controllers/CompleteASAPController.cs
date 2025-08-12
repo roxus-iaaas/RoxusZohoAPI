@@ -7,6 +7,16 @@ using System.Threading.Tasks;
 using System;
 using RoxusZohoAPI.Models.CompleteASAP.Hoowla;
 using System.Collections.Generic;
+using Newtonsoft.Json;
+using RoxusZohoAPI.Helpers;
+using RoxusZohoAPI.Models.Nintex;
+using RoxusZohoAPI.Models.Nuvoli.Halo;
+using RoxusZohoAPI.Models.Zoho.ZohoDesk;
+using System.IO;
+using System.Text;
+using RoxusZohoAPI.Services.Nintex;
+using RoxusZohoAPI.Services.Zoho.ZohoDesk;
+using RoxusZohoAPI.Services.Contxtus;
 
 namespace RoxusZohoAPI.Controllers
 {
@@ -17,10 +27,17 @@ namespace RoxusZohoAPI.Controllers
     {
 
         private readonly IHoowlaService _hoowlaService;
+        private readonly INintexService _nintexService;
+        private readonly IZohoDeskService _zohoDeskService;
+        private readonly IContxtusService _contxtusService;
 
-        public CompleteASAPController(IHoowlaService hoowlaService)
+        public CompleteASAPController(IHoowlaService hoowlaService,
+            INintexService nintexService, IZohoDeskService zohoDeskService, IContxtusService contxtusService)
         {
             _hoowlaService = hoowlaService;
+            _nintexService = nintexService;
+            _zohoDeskService = zohoDeskService;
+            _contxtusService = contxtusService;
         }
 
         [HttpGet("person/{personId}")]
@@ -725,6 +742,7 @@ namespace RoxusZohoAPI.Controllers
 
         #endregion
 
+        #region Person
 
         [HttpPost("person/byemail")]
         public async Task<IActionResult> GetPersonByEmail
@@ -759,7 +777,7 @@ namespace RoxusZohoAPI.Controllers
         }
 
         [HttpPost("person/byemail-v2")]
-        public async Task<IActionResult> GetPersonByEmailV2 ([FromBody] GetPersonByEmailV2Request getPersonByEmailV2Request)
+        public async Task<IActionResult> GetPersonByEmailV2([FromBody] GetPersonByEmailV2Request getPersonByEmailV2Request)
         {
             var apiResultDto = new ApiResultDto<GetPersonByEmailV2Response>()
             {
@@ -786,6 +804,141 @@ namespace RoxusZohoAPI.Controllers
 
             }
         }
+
+        #endregion
+
+        #region Nintex API
+
+        [HttpPost("nintex/spo-case-setup/{caseGUID}")]
+        public async Task<IActionResult> TriggerSPOCaseSetup(string caseGUID)
+        {
+
+            var apiResult = new ApiResultDto<AddTask244Response>()
+            {
+                Code = ResultCode.BadRequest,
+                Message = CommonConstants.MSG_400
+            };
+
+            string content = "";
+            using (StreamReader reader = new StreamReader(Request.Body, Encoding.UTF8))
+            {
+                content = await reader.ReadToEndAsync();
+            }
+
+            string emailBody = $"Hi Roxus,<br><br>Please review the request body:<br>{content}";
+
+            var emailContent = new EmailContent()
+            {
+                Subject = $"[CompleteASAP] SPO Case Setup Trigger",
+                Clients = "hoang.tran@roxus.io,misha@roxus.io,ofer.einy@roxus.io"
+            };
+
+            try
+            {
+
+                var addTask244Request = new AddTask244Request()
+                {
+                    query = "mutation AddTask($task: AddTaskInput!) { addTask(task: $task) { id name queueId tenantId createdAt state } }",
+                };
+
+                var parentVariables = new Variables244();
+                var task = new Task244()
+                {
+                    queueId = "0652e693-4d52-4fa0-a52e-87902f09e210",
+                    name = $"[CompleteASAP] SPO Case Setup {caseGUID}",
+                    wizardCustomName = "CASSPOCaseSetup",
+                    priority = 1,
+                    tenantId = "1",
+                };
+
+                var variables = new List<Variable244>();
+                var variable = new Variable244()
+                {
+                    name = "caseGUID",
+                    value = caseGUID
+                };
+
+                variables.Add(variable);
+                task.variables = variables;
+
+                parentVariables.task = task;
+
+                addTask244Request.variables = parentVariables;
+
+                apiResult = await _nintexService.AddTask244(addTask244Request);
+
+                var inputSummary = new
+                {
+                    TicketId = caseGUID,
+                    WizardCustomId = "CASSPOCaseSetup"
+                };
+                var addTask244 = apiResult.Data;
+
+                if (addTask244 == null)
+                {
+
+                    apiResult.Message = "Cannot create Task on Nintex 24.4";
+
+                    // Send Error Email
+                    emailBody += $"<br>Create Task Result: {JsonConvert.SerializeObject(apiResult)}";
+                    emailContent.Body = emailBody;
+                    await EmailHelpers.SendEmail(emailContent);
+
+                    // Create Ticket
+                    var createTicketRequest = new CreateTicketRequest()
+                    {
+                        //channel = "",
+                        contactId = "475647000017068001",
+                        classification = "Problem",
+                        departmentId = "475647000000006907",
+                        description = emailBody,
+                        email = "misha@roxus.io",
+                        priority = "High",
+                        status = "Open",
+                        subject = $"[CompleteASAP] SPO Case Setup - Case GUID: {caseGUID}"
+                    };
+
+                    var createTicketResponse = await _zohoDeskService
+                        .CreateTicket("cm94dXM6em9ob2Rlc2s=", createTicketRequest);
+
+                    return BadRequest(apiResult);
+                }
+
+                var integrationLog = new IntegrationLogForCreation()
+                {
+                    InputSummary = JsonConvert.SerializeObject(inputSummary),
+                    Input1 = caseGUID,
+                    Input2 = "CASSPOCaseSetup",
+                    CompanyId = "0424F17F-A0C0-47F1-892F-439C3A907F46",
+                    DepartmentId = "5806341F-86B9-4980-9DB3-F159858EA9D0",
+                    PlatformName = "Hoowla",
+                    OutputSummary = JsonConvert.SerializeObject(addTask244),
+                };
+
+                var createIntegrationLogResponse =
+                    await _contxtusService.CreateIntegrationLog(integrationLog);
+
+                if (apiResult.Code == ResultCode.OK)
+                {
+                    return Ok(apiResult);
+                }
+
+                return BadRequest(apiResult);
+
+            }
+            catch (Exception ex)
+            {
+
+                emailBody += $"<br>Create Task Result: {JsonConvert.SerializeObject(apiResult)}<br>" +
+                    $"Exception: {ex.Message} - {ex.StackTrace}";
+                emailContent.Body = emailBody;
+                await EmailHelpers.SendEmail(emailContent);
+                return BadRequest(apiResult);
+
+            }
+        }
+
+        #endregion
 
     }
 

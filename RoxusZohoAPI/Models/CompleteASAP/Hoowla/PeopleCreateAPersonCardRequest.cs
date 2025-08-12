@@ -30,7 +30,7 @@ namespace RoxusZohoAPI.Models.CompleteASAP.Hoowla
         public string person_ni { get; set; }
 
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
-        public bool person_is_company { get; set; }
+        public bool? person_is_company { get; set; }
 
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public string person_company { get; set; }
