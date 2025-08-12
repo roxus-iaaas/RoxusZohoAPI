@@ -67,7 +67,7 @@ namespace RoxusZohoAPI.Controllers
             {
 
                 return BadRequest(apiResultDto);
-            
+
             }
         }
 
@@ -162,7 +162,7 @@ namespace RoxusZohoAPI.Controllers
         }
 
         [HttpPut("case/{caseId}/custom-fields/many")]
-        public async Task<IActionResult> CasesUpdateManyCustomFields(string caseId, 
+        public async Task<IActionResult> CasesUpdateManyCustomFields(string caseId,
             [FromBody] CasesUpdateManyCustomFieldsRequest updateRequest)
         {
 
@@ -363,7 +363,7 @@ namespace RoxusZohoAPI.Controllers
         }
 
         [HttpPost("cases/create-case")]
-        public async Task<IActionResult> CasesCreateANewCase ([FromBody] CasesCreateANewCaseRequest request)
+        public async Task<IActionResult> CasesCreateANewCase([FromBody] CasesCreateANewCaseRequest request)
         {
             var apiResultDto = new ApiResultDto<CasesCreateANewCaseResponse>()
             {
@@ -655,7 +655,7 @@ namespace RoxusZohoAPI.Controllers
         #region Quote
 
         [HttpGet("quote/situation")]
-        public async Task<IActionResult> QuoteGetCompanyCustomQuoteSituations ()
+        public async Task<IActionResult> QuoteGetCompanyCustomQuoteSituations()
         {
             var apiResultDto = new ApiResultDto<List<QuoteGetCompanyCustomQuoteSituationsResponse>>()
             {
@@ -715,7 +715,7 @@ namespace RoxusZohoAPI.Controllers
         #region Users
 
         [HttpGet("users/list-users-employees")]
-        public async Task<IActionResult> UsersListUsersEmployees ()
+        public async Task<IActionResult> UsersListUsersEmployees()
         {
             var apiResultDto = new ApiResultDto<List<UsersListUsersEmployeesResponse>>()
             {
@@ -803,6 +803,37 @@ namespace RoxusZohoAPI.Controllers
                 return BadRequest(apiResultDto);
 
             }
+        }
+
+        [HttpPost("land-registry/property-desc")]
+        public async Task<IActionResult> LandRegPerformEnquiryByPropertyDesc([FromBody] LandRegPerformEnquiryByPropertyDescRequest requestObj)
+        {
+            var apiResultDto = new ApiResultDto<List<LandRegPerformEnquiryByPropertyDescResponse>>()
+            {
+                Code = ResultCode.BadRequest,
+                Message = CompleteASAPConstants.LRPEBPD_400,
+                Data = null
+            };
+
+            try
+            {
+                apiResultDto = await _hoowlaService.LandRegPerformEnquiryByPropertyDesc(requestObj);
+
+                if (apiResultDto.Code == ResultCode.OK)
+                {
+                    return Ok(apiResultDto);
+                }
+
+                return BadRequest(apiResultDto);
+            }
+            
+            catch (Exception)
+            {
+
+                return BadRequest(apiResultDto);
+
+            }
+
         }
 
         #endregion
@@ -934,12 +965,10 @@ namespace RoxusZohoAPI.Controllers
                 emailContent.Body = emailBody;
                 await EmailHelpers.SendEmail(emailContent);
                 return BadRequest(apiResult);
-
             }
+
+            #endregion
         }
-
-        #endregion
-
     }
 
 }
