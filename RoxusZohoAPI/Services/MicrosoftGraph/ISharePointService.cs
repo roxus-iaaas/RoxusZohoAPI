@@ -1,5 +1,6 @@
 ﻿using RoxusZohoAPI.Models.Common;
 using RoxusZohoAPI.Models.MicrosoftGraph;
+using RoxusZohoAPI.Models.SharePoint;
 using System.Threading.Tasks;
 
 namespace RoxusZohoAPI.Services.MicrosoftGraph
@@ -10,6 +11,12 @@ namespace RoxusZohoAPI.Services.MicrosoftGraph
 
         Task<ApiResultDto<string>> 
             DownloadFile(DownloadSharePointFileRequest request);
+
+        Task<ApiResultDto<string>> SearchFilesInFolder
+            (SearchFilesInFolderRequest request);
+
+        Task<ApiResultDto<string>> SearchFoldersByName
+            (SearchFoldersByNameRequest request);
 
     }
 

@@ -18,6 +18,9 @@ namespace RoxusZohoAPI.Models.CompleteASAP.Hoowla
         public string person_email { get; set; }
 
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+        public string person_phone { get; set; }
+
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public string person_dob { get; set; }
 
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]

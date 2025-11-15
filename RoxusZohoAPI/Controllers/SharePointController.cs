@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System;
 using RoxusZohoAPI.Models.MicrosoftGraph;
 using RoxusZohoAPI.Models.Common;
+using RoxusZohoAPI.Models.SharePoint;
 
 namespace RoxusZohoAPI.Controllers
 {
@@ -41,6 +42,48 @@ namespace RoxusZohoAPI.Controllers
                 return BadRequest(apiResult);
             }
         
+        }
+
+        [HttpPost("search-files")]
+        public async Task<IActionResult> SearchFilesInFolder([FromBody]
+            SearchFilesInFolderRequest request)
+        {
+            var apiResult = new ApiResultDto<string>();
+            try
+            {
+                apiResult = await _sharePointService.SearchFilesInFolder(request);
+                if (apiResult.Code == ResultCode.OK)
+                {
+                    return Ok(apiResult);
+                }
+                return BadRequest(apiResult);
+            }
+            catch (Exception)
+            {
+                return BadRequest(apiResult);
+            }
+
+        }
+
+        [HttpPost("search-folders")]
+        public async Task<IActionResult> SearchFolders([FromBody]
+            SearchFoldersByNameRequest request)
+        {
+            var apiResult = new ApiResultDto<string>();
+            try
+            {
+                apiResult = await _sharePointService.SearchFoldersByName(request);
+                if (apiResult.Code == ResultCode.OK)
+                {
+                    return Ok(apiResult);
+                }
+                return BadRequest(apiResult);
+            }
+            catch (Exception)
+            {
+                return BadRequest(apiResult);
+            }
+
         }
 
     }
