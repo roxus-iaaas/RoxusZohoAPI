@@ -440,7 +440,7 @@ namespace RoxusZohoAPI.Services.MicrosoftGraph
             var apiResult = new ApiResultDto<string>()
             {
                 Code = ResultCode.BadRequest,
-                Message = $"Create SharePoint folder ${request.FolderName} FAILED"
+                Message = $"Create SharePoint folder {request.FolderName} FAILED"
             };
 
             try
@@ -534,7 +534,7 @@ namespace RoxusZohoAPI.Services.MicrosoftGraph
                         var responseObj = JsonConvert.DeserializeObject<CreateSharePointFolderResponse>(responseData);
 
                         apiResult.Code = ResultCode.OK;
-                        apiResult.Message = $"Create SharePoint folder ${folderName} SUCCESSFULLY";
+                        apiResult.Message = $"Create SharePoint folder {folderName} SUCCESSFULLY";
                         apiResult.Data = responseObj.id;
                     }
                     else
