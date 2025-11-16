@@ -86,6 +86,27 @@ namespace RoxusZohoAPI.Controllers
 
         }
 
+        [HttpPost("create-folder")]
+        public async Task<IActionResult> CreateFolderInFolder([FromBody]
+            CreateSharePointFolderRequest request)
+        {
+            var apiResult = new ApiResultDto<string>();
+            try
+            {
+                apiResult = await _sharePointService.CreateFolderInFolder(request);
+                if (apiResult.Code == ResultCode.OK)
+                {
+                    return Ok(apiResult);
+                }
+                return BadRequest(apiResult);
+            }
+            catch (Exception)
+            {
+                return BadRequest(apiResult);
+            }
+
+        }
+
     }
 
 }

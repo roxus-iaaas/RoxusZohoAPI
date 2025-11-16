@@ -9,7 +9,6 @@ using System.Net;
 using System.Text;
 using System;
 using System.Threading.Tasks;
-using Azure;
 using RoxusZohoAPI.Models.SharePoint;
 using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
@@ -436,8 +435,123 @@ namespace RoxusZohoAPI.Services.MicrosoftGraph
             }
         }
 
+        public async Task<ApiResultDto<string>> CreateFolderInFolder(CreateSharePointFolderRequest request)
+        {
+            var apiResult = new ApiResultDto<string>()
+            {
+                Code = ResultCode.BadRequest,
+                Message = $"Create SharePoint folder ${request.FolderName} FAILED"
+            };
 
+            try
+            {
+                string folderId = request.FolderId;
+                string folderName = request.FolderName;
+                string customerName = request.CustomerName;
 
+                if (string.IsNullOrEmpty(folderId))
+                {
+                    apiResult.Message = "RoxusError! Folder Id / Folder Path is mandatory";
+                    return apiResult;
+                }
+
+                string siteId = string.Empty;
+                string username = string.Empty;
+                string password = string.Empty;
+
+                if (customerName == "Enviromontel")
+                {
+                    siteId = EnviromontelConstants.AutomationSiteId;
+                    username = EnviromontelConstants.MGUserName;
+                    password = EnviromontelConstants.MGPassword;
+                }
+                else if (customerName == "Nuvoli")
+                {
+                    siteId = NuvoliConstants.AutomationSiteId;
+                    username = NuvoliConstants.MGUserName;
+                    password = NuvoliConstants.MGPassword;
+                }
+
+                byte[] stringBytes = Encoding.UTF8.GetBytes($"{username}:{password}");
+                string apiKey = Convert.ToBase64String(stringBytes);
+
+                #region STEP 1: Get Microsoft Graph Access Token
+                string accessToken = string.Empty;
+                string accessEndpoint = "https://roxuszohoapi.azurewebsites.net/api/microsoft/token";
+                var accessRequest = new HttpRequestMessage(HttpMethod.Get, accessEndpoint);
+
+                var httpClient = new HttpClient();
+                httpClient.DefaultRequestHeaders.Add("Authorization", $"Basic {apiKey}");
+
+                using (var accessResponse = await httpClient.SendAsync(accessRequest))
+                {
+                    string responseData = await accessResponse.Content.ReadAsStringAsync();
+                    if (accessResponse.StatusCode == HttpStatusCode.OK)
+                    {
+                        var responseObj = JsonConvert.DeserializeObject<AppConfiguration>(responseData);
+                        accessToken = responseObj.AccessToken;
+                    }
+                }
+
+                if (string.IsNullOrEmpty(accessToken))
+                {
+                    apiResult.Message = "RoxusError! Cannot get Microsoft Graph access token";
+                    return apiResult;
+                }
+                #endregion
+
+                #region STEP 2: Call API to create folder
+
+                string createFolderEndpoint = $"https://graph.microsoft.com/v1.0/sites/{siteId}" +
+                    $"/drive/items/{folderId}/children";
+
+                string requestBody = "{\"name\":\"" + folderName + "\",\"folder\":{}}";
+
+                var createFoldersRequest = new HttpRequestMessage(
+                           HttpMethod.Post,
+                           createFolderEndpoint)
+                {
+                    Content = new StringContent(requestBody, Encoding.UTF8, "application/json")
+                };
+
+                httpClient = new HttpClient();
+                httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {accessToken}");
+
+                using (var createFolderResponse = httpClient.SendAsync(createFoldersRequest,
+                           HttpCompletionOption.ResponseHeadersRead))
+                {
+                    var createFolderResult = createFolderResponse.Result;
+                    // createFolderResult.EnsureSuccessStatusCode();
+                    var stream = createFolderResult.Content.ReadAsStreamAsync().Result;
+
+                    // Convert stream to string
+                    StreamReader reader = new StreamReader(stream);
+                    string responseData = reader.ReadToEnd();
+
+                    if (createFolderResult.StatusCode == HttpStatusCode.OK
+                        || createFolderResult.StatusCode == HttpStatusCode.Created)
+                    {
+                        var responseObj = JsonConvert.DeserializeObject<CreateSharePointFolderResponse>(responseData);
+
+                        apiResult.Code = ResultCode.OK;
+                        apiResult.Message = $"Create SharePoint folder ${folderName} SUCCESSFULLY";
+                        apiResult.Data = responseObj.id;
+                    }
+                    else
+                    {
+                        apiResult.Data = responseData;
+                    }
+                }
+                #endregion
+
+                return apiResult;
+            }
+            catch (Exception ex)
+            {
+                apiResult.Message = $"RoxusError! {ex.Message} - {ex.StackTrace}";
+                return apiResult;
+            }
+        }
     }
 
 }

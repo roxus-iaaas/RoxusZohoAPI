@@ -18,6 +18,9 @@ namespace RoxusZohoAPI.Services.MicrosoftGraph
         Task<ApiResultDto<string>> SearchFoldersByName
             (SearchFoldersByNameRequest request);
 
+        Task<ApiResultDto<string>> CreateFolderInFolder
+            (CreateSharePointFolderRequest request);
+
     }
 
 }
