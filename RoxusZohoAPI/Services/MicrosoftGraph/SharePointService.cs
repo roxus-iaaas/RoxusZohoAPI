@@ -275,8 +275,8 @@ namespace RoxusZohoAPI.Services.MicrosoftGraph
                 string folderName = request.FolderName;
                 string customerName = request.CustomerName;
                 string folderPath = request.FolderPath;
-                var exactMatch = request.ExactMatch;
-                var firstLevel = request.FirstLevel;
+                bool exactMatch = request.ExactMatch;
+                bool firstLevel = request.FirstLevel;
 
                 if (string.IsNullOrEmpty(folderId) && string.IsNullOrEmpty(folderPath))
                 {
@@ -284,10 +284,8 @@ namespace RoxusZohoAPI.Services.MicrosoftGraph
                     return apiResult;
                 }
 
-                string siteId = string.Empty;
-                string username = string.Empty;
-                string password = string.Empty;
-
+                // ---------- customer config ----------
+                string siteId = string.Empty, username = string.Empty, password = string.Empty;
                 if (customerName == "Enviromontel")
                 {
                     siteId = EnviromontelConstants.AutomationSiteId;
@@ -301,24 +299,19 @@ namespace RoxusZohoAPI.Services.MicrosoftGraph
                     password = NuvoliConstants.MGPassword;
                 }
 
-                byte[] stringBytes = Encoding.UTF8.GetBytes($"{username}:{password}");
-                string apiKey = Convert.ToBase64String(stringBytes);
-
-                #region STEP 1: Get Microsoft Graph Access Token
+                // ---------- STEP 1: get access token ----------
                 string accessToken = string.Empty;
-                string accessEndpoint = "https://roxuszohoapi.azurewebsites.net/api/microsoft/token";
-                var accessRequest = new HttpRequestMessage(HttpMethod.Get, accessEndpoint);
-
-                var httpClient = new HttpClient();
-                httpClient.DefaultRequestHeaders.Add("Authorization", $"Basic {apiKey}");
-
-                using (var accessResponse = await httpClient.SendAsync(accessRequest))
+                using (var httpAuth = new HttpClient())
                 {
-                    string responseData = await accessResponse.Content.ReadAsStringAsync();
-                    if (accessResponse.StatusCode == HttpStatusCode.OK)
+                    string apiKey = Convert.ToBase64String(Encoding.UTF8.GetBytes($"{username}:{password}"));
+                    httpAuth.DefaultRequestHeaders.Add("Authorization", $"Basic {apiKey}");
+
+                    var tokenResp = await httpAuth.GetAsync("https://roxuszohoapi.azurewebsites.net/api/microsoft/token");
+                    if (tokenResp.StatusCode == HttpStatusCode.OK)
                     {
-                        var responseObj = JsonConvert.DeserializeObject<AppConfiguration>(responseData);
-                        accessToken = responseObj.AccessToken;
+                        var raw = await tokenResp.Content.ReadAsStringAsync();
+                        var cfg = JsonConvert.DeserializeObject<AppConfiguration>(raw);
+                        accessToken = cfg?.AccessToken ?? string.Empty;
                     }
                 }
 
@@ -327,106 +320,145 @@ namespace RoxusZohoAPI.Services.MicrosoftGraph
                     apiResult.Message = "RoxusError! Cannot get Microsoft Graph access token";
                     return apiResult;
                 }
-                #endregion
 
-                // STEP 2: Build search endpoint
-                string endpointBase = $"https://graph.microsoft.com/v1.0/sites/{siteId}/drive/";
+                // ---------- helpers for safe encoding ----------
+                string EncodePathSegments(string path)
+                {
+                    if (string.IsNullOrWhiteSpace(path)) return string.Empty;
+                    return string.Join("/",
+                        path.Split(new[] { '/' }, StringSplitOptions.RemoveEmptyEntries)
+                            .Select(seg => Uri.EscapeDataString(seg)));
+                }
+
+                // Graph's search(q='...') expects the value inside single quotes.
+                // If folderName contains single-quote, double it (Graph escaping).
+                string safeName = (folderName ?? string.Empty).Replace("'", "''");
+                // encode content so spaces/special chars become %20, etc.
+                string encodedName = Uri.EscapeDataString(safeName);
+
+                // ---------- STEP 2: build search endpoint safely ----------
+                string baseUrl = $"https://graph.microsoft.com/v1.0/sites/{Uri.EscapeDataString(siteId)}/drive/";
                 string searchEndpoint;
 
                 if (!string.IsNullOrEmpty(folderId))
-                    searchEndpoint = $"{endpointBase}items/{folderId}/search(q='{folderName}')";
-                else
-                    searchEndpoint = $"{endpointBase}root:/{folderPath}:/search(q='{folderName}')";
-
-                var searchFoldersRequest = new HttpRequestMessage(HttpMethod.Get, searchEndpoint);
-                httpClient = new HttpClient();
-                httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {accessToken}");
-
-                using (var searchFoldersResponse = await httpClient.SendAsync(searchFoldersRequest))
                 {
-                    searchFoldersResponse.EnsureSuccessStatusCode();
-                    string responseData = await searchFoldersResponse.Content.ReadAsStringAsync();
-
-                    if (searchFoldersResponse.StatusCode == HttpStatusCode.OK)
-                    {
-                        var responseObj = JsonConvert.DeserializeObject<SearchSharePointFolderResponse>(responseData);
-                        var responseValue = responseObj.value;
-
-                        if (responseValue == null || responseValue.Length == 0)
-                        {
-                            apiResult.Message = "RoxusError! No folders found.";
-                            return apiResult;
-                        }
-
-                        string output = string.Empty;
-                        string normalizedTargetPath = (folderPath ?? "").TrimStart('/').TrimEnd('/').ToLower();
-
-                        foreach (var item in responseValue)
-                        {
-                            // Only folders
-                            if (item.size > 0)
-                                continue;
-
-                            string itemName = item.name;
-
-                            // Pre-filter by folder name
-                            bool nameMatch = exactMatch == true
-                                ? itemName.Equals(folderName, StringComparison.InvariantCultureIgnoreCase)
-                                : itemName.Contains(folderName, StringComparison.InvariantCultureIgnoreCase);
-
-                            if (!nameMatch)
-                                continue;
-
-                            // Fetch full details to get parentReference.path
-                            string detailEndpoint = $"https://graph.microsoft.com/v1.0/sites/{siteId}/drive/items/{item.id}";
-                            var detailRequest = new HttpRequestMessage(HttpMethod.Get, detailEndpoint);
-                            detailRequest.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", accessToken);
-
-                            string itemPath = string.Empty;
-                            using (var detailResponse = await httpClient.SendAsync(detailRequest))
-                            {
-                                if (!detailResponse.IsSuccessStatusCode)
-                                    continue;
-
-                                string detailData = await detailResponse.Content.ReadAsStringAsync();
-                                var detailObj = JsonConvert.DeserializeObject<SearchSharePointFolderItem>(detailData);
-
-                                itemPath = detailObj.parentReference?.path ?? string.Empty;
-                                itemPath = itemPath.Replace("/drive/root:", "").TrimStart('/');
-                                itemPath = string.IsNullOrEmpty(itemPath) ? itemName : $"{itemPath}/{itemName}";
-                            }
-
-                            // First-level filter: normalize paths by removing leading slash
-                            if (firstLevel)
-                            {
-                                string parentPath = "";
-                                if (itemPath.Contains("/"))
-                                    parentPath = string.Join("/", itemPath.Split('/').Reverse().Skip(1).Reverse());
-
-                                string normalizedParent = parentPath.TrimStart('/').TrimEnd('/').ToLower();
-                                if (normalizedParent != normalizedTargetPath)
-                                    continue;
-                            }
-
-                            // Add to output
-                            string line = $"{itemName}{CommonConstants.ColumnDelimiter}{item.id}{CommonConstants.ColumnDelimiter}{itemPath}";
-                            output = string.IsNullOrEmpty(output) ? line : $"{output}{CommonConstants.RowDelimiter}{line}";
-                        }
-
-                        if (string.IsNullOrEmpty(output))
-                        {
-                            apiResult.Message = "RoxusError! No matching folder found at the specified level.";
-                            return apiResult;
-                        }
-
-                        apiResult.Code = ResultCode.OK;
-                        apiResult.Message = "Search SharePoint Folders SUCCESSFULLY";
-                        apiResult.Data = output;
-                        return apiResult;
-                    }
+                    // items/{id}/search(q='...') and request parentReference via $select
+                    // Note: folderId is usually an ID (GUID). Escape it to be safe.
+                    searchEndpoint =
+                        $"{baseUrl}items/{Uri.EscapeDataString(folderId)}/search(q='{encodedName}')?$select=id,name,size,parentReference";
+                }
+                else
+                {
+                    // root:/{path}:/search(q='...') -> encode path segments but keep slashes
+                    var safePath = (folderPath ?? string.Empty).Trim('/');
+                    var encodedPath = EncodePathSegments(safePath);
+                    searchEndpoint =
+                        $"{baseUrl}root:/{encodedPath}:/search(q='{encodedName}')?$select=id,name,size,parentReference";
                 }
 
-                return apiResult;
+                // ---------- create HttpClient and perform search ----------
+                using (var http = new HttpClient())
+                {
+                    http.DefaultRequestHeaders.Authorization =
+                        new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", accessToken);
+
+                    var searchResp = await http.GetAsync(searchEndpoint);
+                    if (!searchResp.IsSuccessStatusCode)
+                    {
+                        apiResult.Message = $"RoxusError! Graph search failed: {(int)searchResp.StatusCode} {searchResp.ReasonPhrase}";
+                        return apiResult;
+                    }
+
+                    var searchJson = await searchResp.Content.ReadAsStringAsync();
+                    var searchObj = JsonConvert.DeserializeObject<SearchSharePointFolderResponse>(searchJson);
+
+                    if (searchObj?.value == null || searchObj.value.Length == 0)
+                    {
+                        apiResult.Message = "RoxusError! No folders found.";
+                        return apiResult;
+                    }
+
+                    string output = string.Empty;
+                    string normalizedTargetPath = (folderPath ?? string.Empty).Trim('/').ToLowerInvariant();
+
+                    foreach (var item in searchObj.value)
+                    {
+                        // skip files (size>0 indicates file in your prior code)
+                        if (item.size > 0)
+                            continue;
+
+                        string itemName = item.name ?? string.Empty;
+
+                        // name match first (cheap)
+                        bool nameMatch = exactMatch
+                            ? itemName.Equals(folderName ?? string.Empty, StringComparison.InvariantCultureIgnoreCase)
+                            : itemName.IndexOf(folderName ?? string.Empty, StringComparison.InvariantCultureIgnoreCase) >= 0;
+
+                        if (!nameMatch)
+                            continue;
+
+                        // parentReference from search response (we requested it with $select)
+                        var parentRef = item?.parentReference;
+                        string parentIdFromSearch = parentRef?.id;
+                        string parentPathFromSearch = parentRef?.path ?? string.Empty;
+
+                        // Normalize parentPathFromSearch -> remove leading "/drive/root:" and leading slash
+                        if (!string.IsNullOrEmpty(parentPathFromSearch))
+                            parentPathFromSearch = parentPathFromSearch.Replace("/drive/root:", "").TrimStart('/');
+
+                        // ---------- MODE: FolderId ----------
+                        if (!string.IsNullOrEmpty(folderId))
+                        {
+                            // Must be direct child of folderId for firstLevel==true,
+                            // and also to restrict scope (Graph search may return outer items)
+                            if (!string.Equals(parentIdFromSearch, folderId, StringComparison.OrdinalIgnoreCase))
+                                continue;
+
+                            // if firstLevel is required, parentId check above already ensures direct child.
+                            // Build full path from parentPathFromSearch + item.name
+                            string fullPath = string.IsNullOrEmpty(parentPathFromSearch)
+                                ? itemName
+                                : $"{parentPathFromSearch}/{itemName}";
+
+                            string line = $"{itemName}{CommonConstants.ColumnDelimiter}{item.id}{CommonConstants.ColumnDelimiter}{fullPath}";
+                            output = string.IsNullOrEmpty(output) ? line : $"{output}{CommonConstants.RowDelimiter}{line}";
+                            continue;
+                        }
+
+                        // ---------- MODE: FolderPath ----------
+                        // Build itemPath from parentPathFromSearch + itemName
+                        string itemPathBuilt = string.IsNullOrEmpty(parentPathFromSearch)
+                            ? itemName
+                            : $"{parentPathFromSearch}/{itemName}";
+
+                        if (firstLevel)
+                        {
+                            // parentPath = itemPathBuilt minus last segment
+                            string parentPath = itemPathBuilt.Contains("/")
+                                ? string.Join("/", itemPathBuilt.Split('/').Reverse().Skip(1).Reverse())
+                                : string.Empty;
+
+                            string normalizedParent = parentPath.Trim('/').ToLowerInvariant();
+                            if (!string.Equals(normalizedParent, normalizedTargetPath, StringComparison.OrdinalIgnoreCase))
+                                continue;
+                        }
+
+                        // Passed all filters — add result
+                        string line2 = $"{itemName}{CommonConstants.ColumnDelimiter}{item.id}{CommonConstants.ColumnDelimiter}{itemPathBuilt}";
+                        output = string.IsNullOrEmpty(output) ? line2 : $"{output}{CommonConstants.RowDelimiter}{line2}";
+                    }
+
+                    if (string.IsNullOrEmpty(output))
+                    {
+                        apiResult.Message = "RoxusError! No matching folder found at the specified level.";
+                        return apiResult;
+                    }
+
+                    apiResult.Code = ResultCode.OK;
+                    apiResult.Message = "Search SharePoint Folders SUCCESSFULLY";
+                    apiResult.Data = output;
+                    return apiResult;
+                }
             }
             catch (Exception ex)
             {
@@ -434,6 +466,7 @@ namespace RoxusZohoAPI.Services.MicrosoftGraph
                 return apiResult;
             }
         }
+
 
         public async Task<ApiResultDto<string>> CreateFolderInFolder(CreateSharePointFolderRequest request)
         {
